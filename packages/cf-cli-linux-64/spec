@@ -1,0 +1,6 @@
+---
+name: cf-cli-linux-64
+
+files:
+- runtime.env.linux-64
+- cf-cli_6.31.0_linux_x86-64.tgz

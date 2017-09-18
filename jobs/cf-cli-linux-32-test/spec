@@ -1,0 +1,10 @@
+---
+name: cf-cli-linux-32-test
+
+templates:
+  run: bin/run
+
+packages:
+- cf-cli-linux-32
+
+properties: {}

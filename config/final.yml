@@ -1,0 +1,7 @@
+name: cf-cli
+blobstore:
+  provider: s3
+  options:
+    region: us-west-1
+    bucket_name: cf-cli-bosh-release
+    endpoint: http://s3-us-west-1.amazonaws.com
