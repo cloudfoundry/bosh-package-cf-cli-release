@@ -2,7 +2,7 @@
 
 set -exu
 
-tar xzf cf-cli_6.31.0_linux_i686.tgz
+tar xzf cf-cli_6.32.0_linux_i686.tgz
 
 mkdir ${BOSH_INSTALL_TARGET}/bin
 cp ./cf ${BOSH_INSTALL_TARGET}/bin/cf

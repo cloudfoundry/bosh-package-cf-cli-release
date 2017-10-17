@@ -3,4 +3,4 @@ name: cf-cli-linux-32
 
 files:
 - runtime.env.linux-32
-- cf-cli_6.31.0_linux_i686.tgz
+- cf-cli_6.32.0_linux_i686.tgz
