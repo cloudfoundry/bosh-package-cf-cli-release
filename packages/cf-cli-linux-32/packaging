@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -x -u
+set -exu
 
 tar xzf cf-cli_6.31.0_linux_i686.tgz
 
