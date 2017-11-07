@@ -8,4 +8,4 @@ mkdir ${BOSH_INSTALL_TARGET}/bin
 cp ./cf ${BOSH_INSTALL_TARGET}/bin/cf
 
 mkdir ${BOSH_INSTALL_TARGET}/bosh
-cp runtime.env.linux-64 ${BOSH_INSTALL_TARGET}/bosh/runtime.env
+cp runtime.env.linux ${BOSH_INSTALL_TARGET}/bosh/runtime.env

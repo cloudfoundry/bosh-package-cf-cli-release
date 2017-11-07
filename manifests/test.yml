@@ -1,5 +1,5 @@
 ---
-name: test-cf-cli-bosh-release
+name: cf-cli-test
 
 releases:
 - name: cf-cli
@@ -18,27 +18,19 @@ update:
   update_watch_time: 5000-60000
 
 instance_groups:
-- name: linux-64-test
+- name: cf-cli-6-linux
   lifecycle: errand
   azs: [z1]
   instances: 1
   jobs:
-  - name: cf-cli-linux-64-test
+  - name: cf-cli-6-linux
+    release: cf-cli
+    properties: {}
+  - name: cf-cli-6-linux-test
     release: cf-cli
     properties: {}
   vm_type: default
   stemcell: default
   networks:
   - name: default
-- name: linux-32-test
-  lifecycle: errand
-  azs: [z1]
-  instances: 1
-  jobs:
-  - name: cf-cli-linux-32-test
-    release: cf-cli
-    properties: {}
-  vm_type: default
-  stemcell: default
-  networks:
-  - name: default
+

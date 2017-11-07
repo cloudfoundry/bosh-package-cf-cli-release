@@ -1,0 +1,11 @@
+---
+name: cf-cli-6-linux
+
+templates:
+  runtime.env: bin/bosh/runtime.env
+
+packages:
+- cf-cli-6-linux
+
+properties: {}
+

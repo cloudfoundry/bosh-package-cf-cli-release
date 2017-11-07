@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -eux
-
-echo "Testing runtime compability"
-
-source /var/vcap/packages/cf-cli-linux-64/bosh/runtime.env
-
-cf -v

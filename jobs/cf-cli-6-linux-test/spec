@@ -1,0 +1,10 @@
+---
+name: cf-cli-6-linux-test
+
+templates:
+  run: bin/run
+
+packages: []
+
+properties: {}
+

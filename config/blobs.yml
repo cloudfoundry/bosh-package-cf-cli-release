@@ -1,7 +1,3 @@
-cf-cli_6.32.0_linux_i686.tgz:
-  size: 5643887
-  object_id: 53f2124c-dbab-4f84-7bd9-9aa8bfda3498
-  sha: 73b36a44e02e0dbd0bb5558317fc5e964a61097b
 cf-cli_6.32.0_linux_x86-64.tgz:
   size: 6065317
   object_id: 2449a6f6-044e-45dc-4eb3-88de786c4f85
