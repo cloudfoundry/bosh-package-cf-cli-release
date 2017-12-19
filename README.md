@@ -1,40 +1,46 @@
 # cf-cli-release
 
-This release contains cf-cli BOSH package that installs cf-cli and provides `runtime.env` that can extend the PATH to include `cf` binary.
+This release allows a BOSH release author to install a specific *blessed version of the CF CLI binary in their deployment.
 
-## Vendoring
+*blessed: the CF CLI binary is signed with a Cloud Foundry Foundation certificate, certifying that the source code has not been tampered with.
 
-This release can be utilized by [bosh package vendoring](https://bosh.io/docs/package-vendoring.html).
+## This release can be consumed as follows:
 
-To vendor cf-cli package for Linux 64 into your release, run:
+### via BOSH `vendor-package`
+
+To vendor the Linux CF CLI BOSH package into your release, run:
 
 ```
-$ git clone https://github.com/cloudfoundry-incubator/cf-cli-release
-$ cd ~/workspace/your-release
-$ bosh vendor-package cf-cli-linux-64 ~/workspace/cf-cli-release
+$ cd ~/workspace
+$ git clone https://github.com/bosh-packages/cf-cli-release
+$ cd ~/workspace/your-bosh-release
+$ bosh vendor-package cf-cli-6-linux ~/workspace/cf-cli-release
 ```
+
+This will copy the Linux CF CLI Bosh package into your bosh release, readily available for your BOSH jobs to utilize as a package dependency.
+
+For examples, see the [BOSH documentation on `vendor-package`](https://bosh.io/docs/package-vendoring.html)
 
 Included packages:
 
-* cf-cli-linux-64
-* cf-cli-linux-32
+* cf-cli-6-linux
 
-## Using cf CLI in your BOSH scripts
+### via co-locating the CF CLI BOSH job
 
-To run `cf` binary for Linux 64 in your BOSH scripts source `runtime.env` to make it available in your PATH:
+To co-locate the Linux CF CLI BOSH job on your target VM, follow these steps:
 
-```bash
-#!/bin/bash
-source /var/vcap/packages/cf-cli-linux-64/bosh/runtime.env
-cf -v
-```
+1. add the "cf-cli" BOSH release to your deployment manifest
+2. add the "cf-cli-6-linux" BOSH job on the VM you want to install the CF CLI binary on
+3. in one of your BOSH job scripts on the same VM, add the following bash command `source /var/vcap/jobs/cf-cli-6-linux/bin/bosh/runtime.env` before any command that calls the `cf` binary
+
+Behind the scenes, the CF CLI binary is installed on the target machine at compile time via the "cf-cli-6-linux" BOSH package (dependency of the "cf-cli-6-linux" BOSH job). Your BOSH job script runs the bash command to add the `cf` binary to PATH.
 
 ## Development
 
-To run tests:
+To test installation of the CF CLI binary via BOSH job co-location, run:
 
 ```
-$ ./tests/test-linux-64.sh
+$ ./tests/run.sh
 ```
 
-This will create a deployment with cf-cli-release against your currently targeted BOSH Director.
+This will create a deployment using your currently targeted BOSH Director.
