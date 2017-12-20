@@ -6,7 +6,7 @@ This release allows a BOSH release author to install a specific *blessed version
 
 ## This release can be consumed as follows:
 
-### via BOSH `vendor-package`
+### via BOSH vendor-package
 
 To vendor the Linux CF CLI BOSH package into your release, run:
 
@@ -19,7 +19,7 @@ $ bosh vendor-package cf-cli-6-linux ~/workspace/cf-cli-release
 
 This will copy the Linux CF CLI Bosh package into your bosh release, readily available for your BOSH jobs to utilize as a package dependency.
 
-For examples, see the [BOSH documentation on `vendor-package`](https://bosh.io/docs/package-vendoring.html)
+For examples, see the [BOSH documentation on vendor-package](https://bosh.io/docs/package-vendoring.html)
 
 Included packages:
 
