@@ -6,6 +6,3 @@ tar xzf cf-cli_6.34.1_linux_x86-64.tgz
 
 mkdir ${BOSH_INSTALL_TARGET}/bin
 cp ./cf ${BOSH_INSTALL_TARGET}/bin/cf
-
-mkdir ${BOSH_INSTALL_TARGET}/bosh
-cp runtime.env.linux ${BOSH_INSTALL_TARGET}/bosh/runtime.env

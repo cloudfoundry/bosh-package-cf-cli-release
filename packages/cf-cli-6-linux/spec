@@ -2,5 +2,4 @@
 name: cf-cli-6-linux
 
 files:
-- runtime.env.linux
 - cf-cli_6.*_linux_x86-64.tgz

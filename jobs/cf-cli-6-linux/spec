@@ -1,8 +1,7 @@
 ---
 name: cf-cli-6-linux
 
-templates:
-  runtime.env: bin/bosh/runtime.env
+templates: {}
 
 packages:
 - cf-cli-6-linux

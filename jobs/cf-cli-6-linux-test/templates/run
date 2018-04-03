@@ -1,8 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
-source /var/vcap/jobs/cf-cli-6-linux/bin/bosh/runtime.env
+export PATH=/var/vcap/packages/cf-cli-6-linux/bin:$PATH
 
 cf -v
-
