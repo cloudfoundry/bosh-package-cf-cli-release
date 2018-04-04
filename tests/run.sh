@@ -17,4 +17,7 @@ bosh run-errand cf-cli-6-linux-test
 echo "-----> `date`: Delete deployments"
 bosh delete-deployment
 
+echo "-----> `date`: Clean up"
+bosh clean-up --all
+
 echo "-----> `date`: Done"

@@ -1,0 +1,60 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: cfcli/cli-release-base
+
+params:
+  ACCESS_KEY_ID:
+  SECRET_KEY:
+
+inputs:
+- name: cf-cli-release-input
+- name: cli-binary-linux-64
+
+outputs:
+  - name: candidate-release-output
+  - name: cf-cli-release-output
+
+run:
+  path: bash
+  args:
+  - -c
+  - |
+    set -ex
+
+    LATEST_CLI_VERSION=$(cat cli-binary-linux-64/version)
+
+    cp -r cf-cli-release-input/. cf-cli-release-output
+
+    cd cf-cli-release-output
+
+    OLD_BLOB_PATH=$(bosh blobs --column=path)
+    OLD_CLI_VERSION=$(echo ${OLD_BLOB_PATH} | cut -d_ -f2)
+
+    if [[ "${OLD_CLI_VERSION}" != "${LATEST_CLI_VERSION}" ]]; then
+      git config --global user.email cf-cli-eng@pivotal.io
+      git config --global user.name "CI Bot"
+
+      cat << EOF > config/private.yml
+    blobstore:
+      options:
+        access_key_id: "$ACCESS_KEY_ID"
+        secret_access_key: "$SECRET_KEY"
+    EOF
+
+      bosh remove-blob $OLD_BLOB_PATH
+
+      bosh add-blob ../cli-binary-linux-64/cf-cli_${LATEST_CLI_VERSION}_linux_x86-64.tgz cf-cli_${LATEST_CLI_VERSION}_linux_x86-64.tgz
+      bosh upload-blobs
+
+      git add --all
+      git status
+      git commit -m "bump cli to ${LATEST_CLI_VERSION}"
+    else
+      echo "Release has latest CLI version, skipping bump."
+    fi
+
+    bosh create-release --timestamp-version --tarball=../candidate-release-output/cf-cli-dev-release.tgz
