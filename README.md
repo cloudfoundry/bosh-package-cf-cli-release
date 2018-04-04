@@ -8,11 +8,15 @@ This release allows a BOSH release author to install a specific *blessed version
 
 To co-locate the Linux CF CLI BOSH job on your target VM, follow these steps:
 
-1. Add the "cf-cli" BOSH release to your deployment manifest.
-2. Colocate the "cf-cli-6-linux" BOSH job in the instance group you want to install the CF CLI binary on.
+1. Add the `cf-cli` BOSH release to your deployment manifest.
+2. Colocate the `cf-cli-6-linux` BOSH job in the instance group you want to install the CF CLI binary on.
 3. Modify your BOSH job script that uses the cli to add the `cf` binary to PATH.
 
-Behind the scenes, the CF CLI binary is installed on the target machine at compile time via the "cf-cli-6-linux" BOSH package (dependency of the "cf-cli-6-linux" BOSH job). The binary is located at `/var/vcap/packages/cf-cli-6-linux/bin/cf`.
+Behind the scenes, the CF CLI binary is installed on the target machine at compile time via the `cf-cli-6-linux` BOSH package (dependency of the `cf-cli-6-linux` BOSH job). The binary is located at `/var/vcap/packages/cf-cli-6-linux/bin/cf`.
+
+### Warning
+Before consuming the release, ensure you've removed all previous `cf` CLI from either your blobs or packages. 
+
 
 ## Development
 
