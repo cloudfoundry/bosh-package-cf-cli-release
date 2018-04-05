@@ -12,7 +12,7 @@ resources:
   source:
     uri: git@github.com:bosh-packages/cf-cli-release
     private_key: ((release-repo-github-key))
-    branch: wip-ci
+    branch: master
     ignore_paths:
       - config/*
       - releases/*
@@ -23,7 +23,7 @@ resources:
   source:
     uri: git@github.com:bosh-packages/cf-cli-release
     private_key: ((release-repo-github-key))
-    branch: wip-ci
+    branch: master
 
 - name: gcp-bosh-pool
   type: pool
