@@ -13,10 +13,6 @@ resources:
     uri: git@github.com:bosh-packages/cf-cli-release
     private_key: ((release-repo-github-key))
     branch: master
-    ignore_paths:
-      - config/*
-      - releases/*
-      - .final_builds/*
 
 - name: cf-cli-release-final
   type: git
@@ -64,7 +60,6 @@ jobs:
     plan:
       - aggregate:
         - get: cf-cli-release
-          trigger: true
         - get: cli-binary-linux-64
           trigger: true
       - task: bump-cli
