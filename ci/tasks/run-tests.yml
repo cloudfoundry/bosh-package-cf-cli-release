@@ -25,4 +25,5 @@ run:
 
     set -x
     cd cf-cli-release
+    bosh upload-stemcell --sha1 a91d200bbe68da7f94794ded9130ae9f36463ff4 https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-trusty-go_agent?v=3586.46
     ./tests/run.sh
