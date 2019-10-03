@@ -1,0 +1,5 @@
+---
+name: cf-cli-6-windows
+
+files:
+- cf-cli_6.46.1_winx64.zip

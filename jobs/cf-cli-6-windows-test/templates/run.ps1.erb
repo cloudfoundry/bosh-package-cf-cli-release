@@ -1,0 +1,7 @@
+$ErrorActionPreference = "Stop";
+trap { $host.SetShouldExit(1) }
+
+$env:Path += ";C:\var\vcap\packages\cf-cli-6-windows\bin"
+
+cf -v
+

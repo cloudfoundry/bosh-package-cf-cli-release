@@ -1,0 +1,16 @@
+$zipfile = Get-Item("cf-cli_6.*_winx64.zip")
+$outdir = "${env:BOSH_INSTALL_TARGET}\bin"
+
+if(!(Test-Path -Path $outdir)) {
+ 	New-Item -ItemType directory -Path $outdir
+}
+
+try {
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outdir)
+} catch {
+  Write-Error $_.Exception.Message
+  Exit 1
+}
+
+Exit 0

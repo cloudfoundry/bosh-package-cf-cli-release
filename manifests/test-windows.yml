@@ -1,0 +1,36 @@
+---
+name: cf-cli-test
+
+releases:
+- name: cf-cli
+  version: create
+  url: file://.
+
+stemcells:
+- alias: default
+  os: windows2019
+  version: latest
+
+update:
+  canaries: 2
+  max_in_flight: 1
+  canary_watch_time: 5000-60000
+  update_watch_time: 5000-60000
+
+instance_groups:
+- name: cf-cli-6-windows
+  lifecycle: errand
+  azs: [z1]
+  instances: 1
+  jobs:
+  - name: cf-cli-6-windows
+    release: cf-cli
+    properties: {}
+  - name: cf-cli-6-windows-test
+    release: cf-cli
+    properties: {}
+  vm_type: default
+  stemcell: default
+  networks:
+  - name: default
+
