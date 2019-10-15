@@ -50,7 +50,7 @@ run:
       bosh add-blob ../cli-binary-linux-64/cf-cli_${LATEST_CLI_VERSION}_linux_x86-64.tgz cf-cli_${LATEST_CLI_VERSION}_linux_x86-64.tgz
       bosh upload-blobs
 
-      git add --all
+      git add config/blobs.yml
       git status
       git commit -m "bump cli to ${LATEST_CLI_VERSION}"
     else
