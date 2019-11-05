@@ -45,4 +45,6 @@ builds:
     version: 1.8.0
   f1c80220-1259-461c-6c9e-b896629ad477:
     version: 0.3.0
+  fa9088f4-34f0-4ac4-6f34-b10e7a6f8e70:
+    version: 1.22.0
 format-version: "2"
