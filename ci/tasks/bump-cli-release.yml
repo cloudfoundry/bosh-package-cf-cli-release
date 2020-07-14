@@ -80,7 +80,7 @@ run:
 
         bosh remove-blob $OLD_V7_BLOB_PATH
 
-        bosh add-blob ../v7-cli-binary/cf-cli_${LATEST_V7_CLI_VERSION}_linux_x86-64.tgz cf-cli_${LATEST_V7_CLI_VERSION}_linux_x86-64.tgz
+        bosh add-blob ../v7-cli-binary/cf7-cli_${LATEST_V7_CLI_VERSION}_linux_x86-64.tgz cf7-cli_${LATEST_V7_CLI_VERSION}_linux_x86-64.tgz
         bosh upload-blobs
 
         git add config/blobs.yml
