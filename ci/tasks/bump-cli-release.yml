@@ -47,7 +47,7 @@ run:
         options:
           access_key_id: "$ACCESS_KEY_ID"
           secret_access_key: "$SECRET_KEY"
-      EOF
+    EOF
 
         bosh remove-blob $OLD_V6_BLOB_PATH
 
@@ -76,7 +76,7 @@ run:
         options:
           access_key_id: "$ACCESS_KEY_ID"
           secret_access_key: "$SECRET_KEY"
-      EOF
+    EOF
 
         bosh remove-blob $OLD_V7_BLOB_PATH
 
