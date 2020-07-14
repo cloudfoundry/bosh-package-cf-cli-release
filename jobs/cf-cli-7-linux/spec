@@ -1,0 +1,10 @@
+---
+name: cf-cli-7-linux
+
+templates: {}
+
+packages:
+- cf-cli-7-linux
+
+properties: {}
+
