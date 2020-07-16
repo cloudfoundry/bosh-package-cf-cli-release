@@ -1,7 +1,9 @@
 FROM ubuntu:trusty
 
-ENV bosh_cli_version 3.0.1
-ENV bbl_version 6.6.4
+# Last updated on 2020-7-16, if updated again please add concourse automation
+# to bump versions of these binaries: https://www.pivotaltracker.com/n/projects/2450704/stories/173838043
+ENV bosh_cli_version 5.3.1
+ENV bbl_version 8.4.0
 ENV terraform_version 0.11.5
 
 RUN \
