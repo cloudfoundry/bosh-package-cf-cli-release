@@ -65,7 +65,7 @@ resources:
 jobs:
   - name: update-cli
     plan:
-      - aggregate:
+      - in_parallel:
         - get: cf-cli-release
         - get: v6-cli-binary-linux-64
           trigger: true
@@ -91,7 +91,7 @@ jobs:
   - name: run-tests
     serial: true
     plan:
-    - aggregate:
+    - in_parallel:
       - get: cf-cli-release
         passed: [update-cli]
         trigger: true
@@ -111,24 +111,24 @@ jobs:
   - name: finalize-release
     serial: true
     plan:
-      - aggregate:
-        - get: cf-cli-release
-          passed: [run-tests]
-          trigger: true
-        - get: release-version
-          params:
-            bump: minor
-      - task: finalize-release
-        file: cf-cli-release/ci/tasks/finalize-release.yml
-        input_mapping:
-          cf-cli-release-input: cf-cli-release
+    - in_parallel:
+      - get: cf-cli-release
+        passed: [run-tests]
+        trigger: true
+      - get: release-version
         params:
-          ACCESS_KEY_ID: ((release-bucket-access-key-id))
-          SECRET_KEY: ((release-bucket-secret-key))
-      - put: release-version
-        params:
-          file: release-version/version
-      - put: cf-cli-release-final
-        params:
-          repository: cf-cli-release-output
-          rebase: true
+          bump: minor
+    - task: finalize-release
+      file: cf-cli-release/ci/tasks/finalize-release.yml
+      input_mapping:
+        cf-cli-release-input: cf-cli-release
+      params:
+        ACCESS_KEY_ID: ((release-bucket-access-key-id))
+        SECRET_KEY: ((release-bucket-secret-key))
+    - put: release-version
+      params:
+        file: release-version/version
+    - put: cf-cli-release-final
+      params:
+        repository: cf-cli-release-output
+        rebase: true
