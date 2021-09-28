@@ -17,6 +17,9 @@ bosh run-errand cf-cli-6-linux-test
 echo "-----> `date`: Run test errand for cf7"
 bosh run-errand cf-cli-7-linux-test
 
+echo "-----> `date`: Run test errand for cf8"
+bosh run-errand cf-cli-8-linux-test
+
 echo "-----> `date`: Delete deployments"
 bosh delete-deployment
 
