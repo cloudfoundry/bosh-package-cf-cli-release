@@ -50,3 +50,20 @@ instance_groups:
   networks:
   - name: default
 
+- name: cf-cli-8-linux
+  lifecycle: errand
+  azs: [z1]
+  instances: 1
+  jobs:
+  - name: cf-cli-8-linux
+    release: cf-cli
+    properties: {}
+  - name: cf-cli-8-linux-test
+    release: cf-cli
+    properties: {}
+  vm_type: default
+  stemcell: default
+  networks:
+  - name: default
+
+

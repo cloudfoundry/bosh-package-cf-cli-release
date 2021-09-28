@@ -1,0 +1,10 @@
+---
+name: cf-cli-8-linux
+
+templates: {}
+
+packages:
+- cf-cli-8-linux
+
+properties: {}
+
