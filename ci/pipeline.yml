@@ -47,7 +47,7 @@ resources:
   type: s3
   source:
     bucket: v8-cf-cli-releases
-    regexp: releases/v(.*)/cf7-cli_(.*)_linux_x86-64.tgz
+    regexp: releases/v(.*)/cf8-cli_(.*)_linux_x86-64.tgz
     region_name: us-west-1
 
 - name: candidate-release
