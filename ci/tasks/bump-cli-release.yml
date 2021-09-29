@@ -117,8 +117,8 @@ run:
         git add config/blobs.yml
         git status
         git commit -m "bump v8 cli to ${LATEST_V8_CLI_VERSION}"
-      else
-        echo "Release has latest v8 CLI version, skipping bump."
+      #else
+      #  echo "Release has latest v8 CLI version, skipping bump."
       #fi
     )
     bosh create-release --timestamp-version --tarball=../candidate-release-output/cf-cli-dev-release.tgz
