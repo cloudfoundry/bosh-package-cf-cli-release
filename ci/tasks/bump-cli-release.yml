@@ -95,10 +95,10 @@ run:
 
     echo "Checking if V8 CLI has been upgraded..."
     (
-      OLD_V8_BLOB_PATH=$(bosh blobs --column=path | grep "cf8-")
-      OLD_V8_CLI_VERSION=$(echo ${OLD_BLOB_PATH} | cut -d_ -f2)
+     # OLD_V8_BLOB_PATH=$(bosh blobs --column=path | grep "cf8-")
+     # OLD_V8_CLI_VERSION=$(echo ${OLD_BLOB_PATH} | cut -d_ -f2)
 
-      if [[ "${OLD_V8_CLI_VERSION}" != "${LATEST_V8_CLI_VERSION}" ]]; then
+      #if [[ "${OLD_V8_CLI_VERSION}" != "${LATEST_V8_CLI_VERSION}" ]]; then
         git config --global user.email cf-cli-eng@pivotal.io
         git config --global user.name "CI Bot"
 
@@ -109,7 +109,7 @@ run:
           secret_access_key: "$SECRET_KEY"
     EOF
 
-        bosh remove-blob $OLD_V8_BLOB_PATH
+       # bosh remove-blob $OLD_V8_BLOB_PATH
 
         bosh add-blob ../v8-cli-binary/cf8-cli_${LATEST_V8_CLI_VERSION}_linux_x86-64.tgz cf8-cli_${LATEST_V8_CLI_VERSION}_linux_x86-64.tgz
         bosh upload-blobs
@@ -119,6 +119,6 @@ run:
         git commit -m "bump v8 cli to ${LATEST_V8_CLI_VERSION}"
       else
         echo "Release has latest v8 CLI version, skipping bump."
-      fi
+      #fi
     )
     bosh create-release --timestamp-version --tarball=../candidate-release-output/cf-cli-dev-release.tgz
