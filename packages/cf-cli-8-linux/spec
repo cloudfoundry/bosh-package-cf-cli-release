@@ -2,4 +2,4 @@
 name: cf-cli-8-linux
 
 files:
-- cf7-cli_8.*_linux_x86-64.tgz
+- cf8-cli_8.*_linux_x86-64.tgz
