@@ -27,7 +27,7 @@ resources:
     uri: git@github.com:cloudfoundry/cli-pools
     private_key: ((pools-repo-github-key))
     branch: master
-    pool: baked-potato
+    pool: v8-pool
 
 - name: v6-cli-binary-linux-64
   type: s3
