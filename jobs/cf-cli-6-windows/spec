@@ -1,0 +1,9 @@
+---
+name: cf-cli-6-windows
+
+templates: {}
+
+packages:
+- cf-cli-6-windows
+
+properties: {}

@@ -8,7 +8,11 @@ releases:
 
 stemcells:
 - alias: default
-  os: ubuntu-xenial
+  os: ubuntu-bionic
+  version: latest
+
+- alias: windows2019
+  os: windows2019
   version: latest
 
 update:
@@ -34,6 +38,22 @@ instance_groups:
   networks:
   - name: default
 
+- name: cf-cli-6-windows
+  lifecycle: errand
+  azs: [z1]
+  instances: 1
+  jobs:
+  - name: cf-cli-6-windows
+    release: cf-cli
+    properties: {}
+  - name: cf-cli-6-windows-test
+    release: cf-cli
+    properties: {}
+  vm_type: default
+  stemcell: windows2019
+  networks:
+  - name: default
+
 - name: cf-cli-7-linux
   lifecycle: errand
   azs: [z1]
@@ -47,6 +67,22 @@ instance_groups:
     properties: {}
   vm_type: default
   stemcell: default
+  networks:
+  - name: default
+
+- name: cf-cli-7-windows
+  lifecycle: errand
+  azs: [z1]
+  instances: 1
+  jobs:
+  - name: cf-cli-7-windows
+    release: cf-cli
+    properties: {}
+  - name: cf-cli-7-windows-test
+    release: cf-cli
+    properties: {}
+  vm_type: default
+  stemcell: windows2019
   networks:
   - name: default
 
@@ -66,4 +102,18 @@ instance_groups:
   networks:
   - name: default
 
-
+- name: cf-cli-8-windows
+  lifecycle: errand
+  azs: [z1]
+  instances: 1
+  jobs:
+  - name: cf-cli-8-windows
+    release: cf-cli
+    properties: {}
+  - name: cf-cli-8-windows-test
+    release: cf-cli
+    properties: {}
+  vm_type: default
+  stemcell: windows2019
+  networks:
+  - name: default

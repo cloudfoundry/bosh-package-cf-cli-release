@@ -1,0 +1,9 @@
+---
+name: cf-cli-8-windows
+
+templates: {}
+
+packages:
+- cf-cli-8-windows
+
+properties: {}

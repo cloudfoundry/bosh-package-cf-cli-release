@@ -11,14 +11,23 @@ bosh delete-deployment --force
 echo "-----> `date`: Deploy"
 bosh deploy ./manifests/test.yml
 
-echo "-----> `date`: Run test errand for cf6"
+echo "-----> `date`: Run test errand for cf6-linux"
 bosh run-errand cf-cli-6-linux-test
 
-echo "-----> `date`: Run test errand for cf7"
+echo "-----> `date`: Run test errand for cf6-windows"
+bosh run-errand cf-cli-6-windows-test
+
+echo "-----> `date`: Run test errand for cf7-linux"
 bosh run-errand cf-cli-7-linux-test
 
-echo "-----> `date`: Run test errand for cf8"
+echo "-----> `date`: Run test errand for cf7-windows"
+bosh run-errand cf-cli-7-windows-test
+
+echo "-----> `date`: Run test errand for cf8-linux"
 bosh run-errand cf-cli-8-linux-test
+
+echo "-----> `date`: Run test errand for cf8-windows"
+bosh run-errand cf-cli-8-windows-test
 
 echo "-----> `date`: Delete deployments"
 bosh delete-deployment

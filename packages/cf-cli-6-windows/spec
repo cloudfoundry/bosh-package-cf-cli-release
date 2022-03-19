@@ -1,0 +1,8 @@
+---
+name: cf-cli-6-windows
+
+dependencies: []
+
+files:
+    - exiter.ps1
+    - cf-cli_*_winx64.zip

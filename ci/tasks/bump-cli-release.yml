@@ -12,9 +12,12 @@ params:
 
 inputs:
 - name: cf-cli-release-input
-- name: v6-cli-binary
-- name: v7-cli-binary
-- name: v8-cli-binary
+- name: v6-cli-linux-binary
+- name: v6-cli-windows-binary
+- name: v7-cli-linux-binary
+- name: v7-cli-windows-binary
+- name: v8-cli-linux-binary
+- name: v8-cli-windows-binary
 
 outputs:
   - name: candidate-release-output
@@ -27,98 +30,156 @@ run:
   - |
     set -ex
 
-    LATEST_V6_CLI_VERSION=$(cat v6-cli-binary/version)
-    LATEST_V7_CLI_VERSION=$(cat v7-cli-binary/version)
-    LATEST_V8_CLI_VERSION=$(cat v8-cli-binary/version)
+    LATEST_LINUX_V6_CLI_VERSION=$(cat v6-cli-linux-binary/version)
+    LATEST_WINDOWS_V6_CLI_VERSION=$(cat v6-cli-windows-binary/version)
+
+    if [[ "${LATEST_LINUX_V6_CLI_VERSION}" != "${LATEST_WINDOWS_V6_CLI_VERSION}" ]]; then
+      echo "Aborting due to v6 CLI version mismatch."
+      exit 1
+    fi
+
+    LATEST_LINUX_V7_CLI_VERSION=$(cat v7-cli-linux-binary/version)
+    LATEST_WINDOWS_V7_CLI_VERSION=$(cat v7-cli-windows-binary/version)
+
+    if [[ "${LATEST_LINUX_V7_CLI_VERSION}" != "${LATEST_WINDOWS_V7_CLI_VERSION}" ]]; then
+      echo "Aborting due to v7 CLI version mismatch."
+      exit 1
+    fi
+
+    LATEST_LINUX_V8_CLI_VERSION=$(cat v8-cli-linux-binary/version)
+    LATEST_WINDOWS_V8_CLI_VERSION=$(cat v8-cli-windows-binary/version)
+
+    if [[ "${LATEST_LINUX_V8_CLI_VERSION}" != "${LATEST_WINDOWS_V8_CLI_VERSION}" ]]; then
+      echo "Aborting due to v8 CLI version mismatch."
+      exit 1
+    fi
 
     cp -r cf-cli-release-input/. cf-cli-release-output
 
     cd cf-cli-release-output
 
-    echo "Checking if V6 CLI has been upgraded..."
-    (
-      OLD_V6_BLOB_PATH=$(bosh blobs --column=path | grep "cf-")
-      OLD_V6_CLI_VERSION=$(echo ${OLD_BLOB_PATH} | cut -d_ -f2)
+    git config --global user.email cf-cli-eng@pivotal.io
+    git config --global user.name "CI Bot"
 
-      if [[ "${OLD_V6_CLI_VERSION}" != "${LATEST_V6_CLI_VERSION}" ]]; then
-        git config --global user.email cf-cli-eng@pivotal.io
-        git config --global user.name "CI Bot"
-
-        cat << EOF > config/private.yml
+    cat << EOF > config/private.yml
       blobstore:
         options:
           access_key_id: "$ACCESS_KEY_ID"
           secret_access_key: "$SECRET_KEY"
     EOF
 
-        bosh remove-blob $OLD_V6_BLOB_PATH
-
-        bosh add-blob ../v6-cli-binary/cf-cli_${LATEST_V6_CLI_VERSION}_linux_x86-64.tgz cf-cli_${LATEST_V6_CLI_VERSION}_linux_x86-64.tgz
-        bosh upload-blobs
-
-        git add config/blobs.yml
-        git status
-        git commit -m "bump v6 cli to ${LATEST_V6_CLI_VERSION}"
-      else
-        echo "Release has latest v6 CLI version, skipping bump."
-      fi
-    )
-
-    echo "Checking if V7 CLI has been upgraded..."
+    echo "Checking if Linux v6 CLI has been upgraded..."
     (
-      OLD_V7_BLOB_PATH=$(bosh blobs --column=path | grep "cf7-")
-      OLD_V7_CLI_VERSION=$(echo ${OLD_BLOB_PATH} | cut -d_ -f2)
+      OLD_V6_BLOB_PATH=$(bosh blobs --column=path | grep "cf-" | grep "linux")
+      OLD_V6_CLI_VERSION=$(echo ${OLD_V6_BLOB_PATH} | cut -d_ -f2)
 
-      if [[ "${OLD_V7_CLI_VERSION}" != "${LATEST_V7_CLI_VERSION}" ]]; then
-        git config --global user.email cf-cli-eng@pivotal.io
-        git config --global user.name "CI Bot"
+      if [[ "${OLD_V6_CLI_VERSION}" != "${LATEST_LINUX_V6_CLI_VERSION}" ]]; then
+        bosh remove-blob "$OLD_V6_BLOB_PATH"
 
-        cat << EOF > config/private.yml
-      blobstore:
-        options:
-          access_key_id: "$ACCESS_KEY_ID"
-          secret_access_key: "$SECRET_KEY"
-    EOF
-
-        bosh remove-blob $OLD_V7_BLOB_PATH
-
-        bosh add-blob ../v7-cli-binary/cf7-cli_${LATEST_V7_CLI_VERSION}_linux_x86-64.tgz cf7-cli_${LATEST_V7_CLI_VERSION}_linux_x86-64.tgz
+        bosh add-blob "../v6-cli-linux-binary/cf-cli_${LATEST_LINUX_V6_CLI_VERSION}_linux_x86-64.tgz" "cf-cli_${LATEST_LINUX_V6_CLI_VERSION}_linux_x86-64.tgz"
         bosh upload-blobs
 
         git add config/blobs.yml
         git status
-        git commit -m "bump v7 cli to ${LATEST_V7_CLI_VERSION}"
+        git commit -m "Bump Linux v6 cli to ${LATEST_LINUX_V6_CLI_VERSION}"
       else
-        echo "Release has latest v7 CLI version, skipping bump."
+        echo "Release has latest Linux v6 CLI version, skipping bump."
       fi
     )
 
-    echo "Checking if V8 CLI has been upgraded..."
+    echo "Checking if Windows v6 CLI has been upgraded..."
     (
-      OLD_V8_BLOB_PATH=$(bosh blobs --column=path | grep "cf8-")
-      OLD_V8_CLI_VERSION=$(echo ${OLD_BLOB_PATH} | cut -d_ -f2)
+      OLD_V6_BLOB_PATH=$(bosh blobs --column=path | grep "cf-" | grep "winx64")
+      OLD_V6_CLI_VERSION=$(echo ${OLD_V6_BLOB_PATH} | cut -d_ -f2)
 
-      if [[ "${OLD_V8_CLI_VERSION}" != "${LATEST_V8_CLI_VERSION}" ]]; then
-        git config --global user.email cf-cli-eng@pivotal.io
-        git config --global user.name "CI Bot"
+      if [[ "${OLD_V6_CLI_VERSION}" != "${LATEST_WINDOWS_V6_CLI_VERSION}" ]]; then
+        bosh remove-blob "$OLD_V6_BLOB_PATH"
 
-        cat << EOF > config/private.yml
-      blobstore:
-        options:
-          access_key_id: "$ACCESS_KEY_ID"
-          secret_access_key: "$SECRET_KEY"
-    EOF
-
-        bosh remove-blob $OLD_V8_BLOB_PATH
-
-        bosh add-blob ../v8-cli-binary/cf8-cli_${LATEST_V8_CLI_VERSION}_linux_x86-64.tgz cf8-cli_${LATEST_V8_CLI_VERSION}_linux_x86-64.tgz
+        bosh add-blob "../v6-cli-windows-binary/cf-cli_${LATEST_WINDOWS_V6_CLI_VERSION}_winx64.zip" "cf-cli_${LATEST_WINDOWS_V6_CLI_VERSION}_winx64.zip"
         bosh upload-blobs
 
         git add config/blobs.yml
         git status
-        git commit -m "bump v8 cli to ${LATEST_V8_CLI_VERSION}"
+        git commit -m "Bump Windows v6 cli to ${LATEST_WINDOWS_V6_CLI_VERSION}"
       else
-        echo "Release has latest v8 CLI version, skipping bump."
+        echo "Release has latest Windows v6 CLI version, skipping bump."
       fi
     )
+
+    echo "Checking if Linux v7 CLI has been upgraded..."
+    (
+      OLD_V7_BLOB_PATH=$(bosh blobs --column=path | grep "cf7-" | grep "linux")
+      OLD_V7_CLI_VERSION=$(echo ${OLD_V7_BLOB_PATH} | cut -d_ -f2)
+
+      if [[ "${OLD_V7_CLI_VERSION}" != "${LATEST_LINUX_V7_CLI_VERSION}" ]]; then
+        bosh remove-blob "$OLD_V7_BLOB_PATH"
+
+        bosh add-blob "../v7-cli-linux-binary/cf7-cli_${LATEST_LINUX_V7_CLI_VERSION}_linux_x86-64.tgz" "cf7-cli_${LATEST_LINUX_V7_CLI_VERSION}_linux_x86-64.tgz"
+        bosh upload-blobs
+
+        git add config/blobs.yml
+        git status
+        git commit -m "Bump Linux v7 cli to ${LATEST_LINUX_V7_CLI_VERSION}"
+      else
+        echo "Release has latest Linux v7 CLI version, skipping bump."
+      fi
+    )
+
+    echo "Checking if Windows v7 CLI has been upgraded..."
+    (
+      OLD_V7_BLOB_PATH=$(bosh blobs --column=path | grep "cf7-" | grep "winx64")
+      OLD_V7_CLI_VERSION=$(echo ${OLD_V7_BLOB_PATH} | cut -d_ -f2)
+
+      if [[ "${OLD_V7_CLI_VERSION}" != "${LATEST_WINDOWS_V7_CLI_VERSION}" ]]; then
+        bosh remove-blob "$OLD_V7_BLOB_PATH"
+
+        bosh add-blob "../v7-cli-windows-binary/cf-cli_${LATEST_WINDOWS_V7_CLI_VERSION}_winx64.zip" "cf-cli_${LATEST_WINDOWS_V7_CLI_VERSION}_winx64.zip"
+        bosh upload-blobs
+
+        git add config/blobs.yml
+        git status
+        git commit -m "Bump Windows v7 cli to ${LATEST_WINDOWS_V7_CLI_VERSION}"
+      else
+        echo "Release has latest Windows v7 CLI version, skipping bump."
+      fi
+    )
+
+    echo "Checking if Linux v8 CLI has been upgraded..."
+    (
+      OLD_V8_BLOB_PATH=$(bosh blobs --column=path | grep "cf8-" | grep "linux")
+      OLD_V8_CLI_VERSION=$(echo ${OLD_V8_BLOB_PATH} | cut -d_ -f2)
+
+      if [[ "${OLD_V8_CLI_VERSION}" != "${LATEST_LINUX_V8_CLI_VERSION}" ]]; then
+        bosh remove-blob "$OLD_V8_BLOB_PATH"
+
+        bosh add-blob "../v8-cli-linux-binary/cf8-cli_${LATEST_LINUX_V8_CLI_VERSION}_linux_x86-64.tgz" "cf8-cli_${LATEST_LINUX_V8_CLI_VERSION}_linux_x86-64.tgz"
+        bosh upload-blobs
+
+        git add config/blobs.yml
+        git status
+        git commit -m "Bump Linux v8 cli to ${LATEST_LINUX_V8_CLI_VERSION}"
+      else
+        echo "Release has latest Linux v8 CLI version, skipping bump."
+      fi
+    )
+
+    echo "Checking if Windows v8 CLI has been upgraded..."
+    (
+      OLD_V8_BLOB_PATH=$(bosh blobs --column=path | grep "cf8-" | grep "winx64")
+      OLD_V8_CLI_VERSION=$(echo ${OLD_V8_BLOB_PATH} | cut -d_ -f2)
+
+      if [[ "${OLD_V8_CLI_VERSION}" != "${LATEST_WINDOWS_V8_CLI_VERSION}" ]]; then
+        bosh remove-blob "$OLD_V8_BLOB_PATH"
+
+        bosh add-blob "../v8-cli-windows-binary/cf-cli_${LATEST_WINDOWS_V8_CLI_VERSION}_winx64.zip" "cf-cli_${LATEST_WINDOWS_V8_CLI_VERSION}_winx64.zip"
+        bosh upload-blobs
+
+        git add config/blobs.yml
+        git status
+        git commit -m "Bump Windows v8 cli to ${LATEST_WINDOWS_V8_CLI_VERSION}"
+      else
+        echo "Release has latest Windows v8 CLI version, skipping bump."
+      fi
+    )
+
     bosh create-release --timestamp-version --tarball=../candidate-release-output/cf-cli-dev-release.tgz

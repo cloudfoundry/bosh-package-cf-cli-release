@@ -1,0 +1,9 @@
+---
+name: cf-cli-7-windows
+
+templates: {}
+
+packages:
+- cf-cli-7-windows
+
+properties: {}
