@@ -31,6 +31,6 @@ lpass sync
 
 pipelines_path=$(cd $(dirname $0)/.. && pwd)
 
-configure_pipeline cf-cli-release $pipelines_path/pipeline.yml
+configure_pipeline cf-cli-release3 $pipelines_path/pipeline.yml
 
 
