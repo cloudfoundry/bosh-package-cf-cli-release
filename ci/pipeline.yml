@@ -153,4 +153,4 @@ jobs:
         rebase: true
     - put: cf-cli-release-final-tarball
       params:
-        file: final-release-tarballs/cf-cli-v1.*.tgz
+        file: cf-cli-release-output/cf-cli-v1.*.tgz
