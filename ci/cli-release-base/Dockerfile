@@ -1,4 +1,4 @@
-FROM ubuntu:trusty
+FROM ubuntu:xenial
 
 # Last updated on 2020-7-16, if updated again please add concourse automation
 # to bump versions of these binaries: https://www.pivotaltracker.com/n/projects/2450704/stories/173838043
