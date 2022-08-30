@@ -59,6 +59,15 @@ resources:
     secret_access_key: ((release-bucket-secret-key))
     region_name: us-west-1
 
+- name: cf-cli-release-final-tarball
+  type: s3
+  source:
+    bucket: cf-cli-bosh-release
+    regexp: cf-cli-v(1\.\d+\.\d+)\.tgz
+    access_key_id: ((release-bucket-access-key-id))
+    secret_access_key: ((release-bucket-secret-key))
+    region_name: us-west-1
+
 - name: release-version
   type: semver
   source:
@@ -142,3 +151,6 @@ jobs:
       params:
         repository: cf-cli-release-output
         rebase: true
+    - put: cf-cli-release-final-tarball
+      params:
+        file: final-release-tarballs/cf-cli-v1.*.tgz
