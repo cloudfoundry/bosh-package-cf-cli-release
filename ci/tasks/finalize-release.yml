@@ -45,4 +45,8 @@ run:
     git add --all
     git status
     git commit -m "create final release ${RELEASE_VERSION}"
-    git tag v${RELEASE_VERSION}
+    
+    JS_SHA=$(git rev-parse HEAD)
+    git tag v${RELEASE_VERSION} ${JS_SHA}
+    git pull -r
+    git push origin ${GIT_BRANCH} --tags
