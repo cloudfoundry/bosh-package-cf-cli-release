@@ -151,6 +151,7 @@ jobs:
       params:
         repository: cf-cli-release-output
         rebase: true
+        tag: release-version/version
     - put: cf-cli-release-final-tarball
       params:
         file: cf-cli-release-output/cf-cli-v1.*.tgz
