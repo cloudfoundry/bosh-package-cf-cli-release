@@ -1,0 +1,32 @@
+tasks:
+  - name: Setup Workspace
+    before: >
+      echo before done
+
+      sudo apt install --yes 
+      icdiff
+      tldr
+      fzf
+      lastpass-cli
+
+      brew install
+      asdf
+
+      echo ". $HOME/.asdf/asdf.sh" >> $HOME/.bashrc
+
+      echo ". $HOME/.asdf/completions/asdf.bash" >> $HOME/.bashrc
+
+      . $HOME/.bashrc
+
+      asdf plugin add fly
+
+      asdf install fly latest
+    init: >
+      echo init done
+      tldr --update 
+    command: echo command done
+
+vscode:
+  extensions:
+    - Pivotal.vscode-concourse
+    - eamodio.gitlens
