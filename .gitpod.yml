@@ -8,6 +8,7 @@ tasks:
       tldr
       fzf
       lastpass-cli
+      tmux
 
       brew install
       asdf
@@ -15,6 +16,8 @@ tasks:
       echo ". $HOME/.asdf/asdf.sh" >> $HOME/.bashrc
 
       echo ". $HOME/.asdf/completions/asdf.bash" >> $HOME/.bashrc
+
+      echo "export GIT_EDITOR=vim" >> $HOME/.bashrc
 
       . $HOME/.bashrc
 
