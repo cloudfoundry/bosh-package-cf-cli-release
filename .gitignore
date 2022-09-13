@@ -22,5 +22,4 @@ blobs
 config/dev.yml
 config/private.yml
 dev_releases
-releases/*.tgz
-releases/**/*.tgz
+**/*.tgz
