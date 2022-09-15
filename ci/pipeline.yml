@@ -5,7 +5,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/cli-private
     private_key: {{private-repo-github-key}}
-    branch: master
+    branch: main
 
 - name: cf-cli-release
   type: git
