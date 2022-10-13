@@ -12,14 +12,14 @@ resources:
   source:
     uri: git@github.com:bosh-packages/cf-cli-release
     private_key: {{release-repo-github-key}}
-    branch: master
+    branch: main
 
 - name: cf-cli-release-final
   type: git
   source:
     uri: git@github.com:bosh-packages/cf-cli-release
     private_key: {{release-repo-github-key}}
-    branch: master
+    branch: main
 
 - name: gcp-bosh-pool
   type: pool
