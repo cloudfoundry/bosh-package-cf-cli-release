@@ -13,12 +13,12 @@ resources:
     private_key: ((release-repo-github-key))
     branch: main
 
-# - name: cf-cli-release-final
-#   type: git
-#   source:
-#     uri: git@github.com:bosh-packages/cf-cli-release
-#     private_key: ((release-repo-github-key))
-#     branch: master
+- name: cf-cli-release-final
+  type: git
+  source:
+    uri: git@github.com:bosh-packages/cf-cli-release
+    private_key: ((release-repo-github-key))
+    branch: main
 
 - name: gcp-env
   type: pcf-pool
@@ -57,15 +57,15 @@ resources:
     secret_access_key: ((release-bucket-secret-key))
     region_name: us-west-1
 
-# - name: release-version
-#   type: semver
-#   source:
-#     access_key_id: ((release-bucket-access-key-id))
-#     secret_access_key: ((release-bucket-secret-key))
-#     initial_version: 1.1.0
-#     bucket: cf-cli-bosh-release
-#     key: version
-#     region_name: us-west-1
+- name: release-version
+  type: semver
+  source:
+    access_key_id: ((release-bucket-access-key-id))
+    secret_access_key: ((release-bucket-secret-key))
+    initial_version: 1.1.0
+    bucket: cf-cli-bosh-release
+    key: version
+    region_name: us-west-1
 
 jobs:
   - name: update-cli
@@ -117,27 +117,27 @@ jobs:
       inputs:
       - gcp-env
 
-  # - name: finalize-release
-  #   serial: true
-  #   plan:
-  #   - in_parallel:
-  #     - get: cf-cli-release
-  #       passed: [run-tests]
-  #       trigger: true
-  #     - get: release-version
-  #       params:
-  #         bump: minor
-  #   - task: finalize-release
-  #     file: cf-cli-release/ci/tasks/finalize-release.yml
-  #     input_mapping:
-  #       cf-cli-release-input: cf-cli-release
-  #     params:
-  #       ACCESS_KEY_ID: ((release-bucket-access-key-id))
-  #       SECRET_KEY: ((release-bucket-secret-key))
-  #   - put: release-version
-  #     params:
-  #       file: release-version/version
-  #   - put: cf-cli-release-final
-  #     params:
-  #       repository: cf-cli-release-output
-  #       rebase: true
+  - name: finalize-release
+    serial: true
+    plan:
+    - in_parallel:
+      - get: cf-cli-release
+        passed: [run-tests]
+        trigger: true
+      - get: release-version
+        params:
+          bump: minor
+    - task: finalize-release
+      file: cf-cli-release/ci/tasks/finalize-release.yml
+      input_mapping:
+        cf-cli-release-input: cf-cli-release
+      params:
+        ACCESS_KEY_ID: ((release-bucket-access-key-id))
+        SECRET_KEY: ((release-bucket-secret-key))
+    - put: release-version
+      params:
+        file: release-version/version
+    - put: cf-cli-release-final
+      params:
+        repository: cf-cli-release-output
+        rebase: true
