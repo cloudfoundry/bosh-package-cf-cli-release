@@ -40,9 +40,8 @@ run:
         secret_access_key: "$SECRET_KEY"
     EOF
 
-    bosh create-release --final --version="${RELEASE_VERSION}"
+    bosh create-release --final --version="${RELEASE_VERSION}" --tarball="./cf-cli-v${RELEASE_VERSION}.tgz"
 
     git add --all
     git status
     git commit -m "create final release ${RELEASE_VERSION}"
-    git tag v${RELEASE_VERSION}
