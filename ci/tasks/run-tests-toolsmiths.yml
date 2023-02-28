@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfcli/cli-release-base
+    repository: cfcli/cli-base
 
 inputs:
 - name: cf-cli-release
@@ -18,7 +18,7 @@ run:
     set -e
 
     ENV=$(cat gcp-env/name)
-    
+
     cat gcp-env/metadata > $ENV.json
     eval "$(bbl print-env --metadata-file $ENV.json)"
 
