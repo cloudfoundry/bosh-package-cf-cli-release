@@ -19,6 +19,7 @@ configure_pipeline() {
     fly -t ci set-pipeline \
     -p $name \
     -c $pipeline \
+    -l <(lpass show "Shared-Dev-ex/toolsmiths-api-token" --notes) \
     -l <(lpass show "cf-cli-release Concourse Credentials" --notes)
 }
 
@@ -31,6 +32,5 @@ lpass sync
 
 pipelines_path=$(cd $(dirname $0)/.. && pwd)
 
-configure_pipeline cf-cli-release3 $pipelines_path/pipeline.yml
-
-
+configure_pipeline cf-cli-release $pipelines_path/pipeline.yml
+configure_pipeline cf-cli-release-toolsmiths $pipelines_path/pipeline-toolsmiths.yml
