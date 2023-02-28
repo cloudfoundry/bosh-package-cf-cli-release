@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfcli/cli-base
+    repository: cfcli/cli-release-base
 
 inputs:
 - name: cf-cli-release
