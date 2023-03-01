@@ -10,20 +10,20 @@ resources:
   type: git
   source:
     uri: git@github.com:bosh-packages/cf-cli-release
-    private_key: ((release-repo-github-key))
-    branch: main
+    private_key: {{release-repo-github-key}}
+    branch: release-4.0
 
 - name: cf-cli-release-final
   type: git
   source:
     uri: git@github.com:bosh-packages/cf-cli-release
-    private_key: ((release-repo-github-key))
-    branch: main
+    private_key: {{release-repo-github-key}}
+    branch: release-4.0
 
 - name: gcp-env
   type: pcf-pool
   source:
-    api_token: ((token))
+    api_token: {{token}}
     hostname: environments.toolsmiths.cf-app.com
     pool_name: cf-deployment
 
@@ -53,15 +53,23 @@ resources:
   source:
     bucket: cf-cli-bosh-release
     versioned_file: cf-cli-dev-release.tgz
-    access_key_id: ((release-bucket-access-key-id))
-    secret_access_key: ((release-bucket-secret-key))
+    access_key_id: {{release-bucket-access-key-id}}
+    secret_access_key: {{release-bucket-secret-key}}
     region_name: us-west-1
 
+- name: cf-cli-release-final-tarball
+  type: s3
+  source:
+    bucket: cf-cli-bosh-release
+    regexp: cf-cli-v(1\.\d+\.\d+)\.tgz
+    access_key_id: {{release-bucket-access-key-id}}
+    secret_access_key: {{release-bucket-secret-key}}
+    region_name: us-west-1
 - name: release-version
   type: semver
   source:
-    access_key_id: ((release-bucket-access-key-id))
-    secret_access_key: ((release-bucket-secret-key))
+    access_key_id: {{release-bucket-access-key-id}}
+    secret_access_key: {{release-bucket-secret-key}}
     initial_version: 1.1.0
     bucket: cf-cli-bosh-release
     key: version
@@ -86,8 +94,8 @@ jobs:
           v8-cli-binary: v8-cli-binary-linux-64
           cf-cli-release-input: cf-cli-release
         params:
-          ACCESS_KEY_ID: ((release-bucket-access-key-id))
-          SECRET_KEY: ((release-bucket-secret-key))
+          ACCESS_KEY_ID: {{release-bucket-access-key-id}}
+          SECRET_KEY: {{release-bucket-secret-key}}
       - put: candidate-release
         params:
           file: "candidate-release-output/cf-cli-dev-release.tgz"
@@ -132,8 +140,8 @@ jobs:
       input_mapping:
         cf-cli-release-input: cf-cli-release
       params:
-        ACCESS_KEY_ID: ((release-bucket-access-key-id))
-        SECRET_KEY: ((release-bucket-secret-key))
+        ACCESS_KEY_ID: {{release-bucket-access-key-id}}
+        SECRET_KEY: {{release-bucket-secret-key}}
     - put: release-version
       params:
         file: release-version/version
@@ -141,3 +149,7 @@ jobs:
       params:
         repository: cf-cli-release-output
         rebase: true
+        tag: release-version/version
+    - put: cf-cli-release-final-tarball
+      params:
+        file: cf-cli-release-output/cf-cli-v1.*.tgz

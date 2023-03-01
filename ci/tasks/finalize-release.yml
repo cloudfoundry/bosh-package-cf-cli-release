@@ -24,7 +24,7 @@ run:
   - |
     set -ex
 
-    RELEASE_VERSION=$(cat release-version/version)
+    RELEASE_VERSION=1.42
 
     cp -r cf-cli-release-input/. cf-cli-release-output
 
