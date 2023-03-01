@@ -12,7 +12,7 @@ params:
 
 inputs:
 - name: cf-cli-release-input
-- name: release-version
+# - name: release-version
 
 outputs:
 - name: cf-cli-release-output
