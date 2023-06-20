@@ -12,7 +12,6 @@ params:
 
 inputs:
 - name: cf-cli-release-input
-- name: v6-cli-binary
 - name: v7-cli-binary
 - name: v8-cli-binary
 
@@ -27,42 +26,12 @@ run:
   - |
     set -ex
 
-    LATEST_V6_CLI_VERSION=$(cat v6-cli-binary/version)
     LATEST_V7_CLI_VERSION=$(cat v7-cli-binary/version)
     LATEST_V8_CLI_VERSION=$(cat v8-cli-binary/version)
 
     cp -r cf-cli-release-input/. cf-cli-release-output
 
     cd cf-cli-release-output
-
-    echo "Checking if V6 CLI has been upgraded..."
-    (
-      OLD_V6_BLOB_PATH=$(bosh blobs --column=path | grep "cf-")
-      OLD_V6_CLI_VERSION=$(echo ${OLD_BLOB_PATH} | cut -d_ -f2)
-
-      if [[ "${OLD_V6_CLI_VERSION}" != "${LATEST_V6_CLI_VERSION}" ]]; then
-        git config --global user.email cf-cli-eng@pivotal.io
-        git config --global user.name "CI Bot"
-
-        cat << EOF > config/private.yml
-      blobstore:
-        options:
-          access_key_id: "$ACCESS_KEY_ID"
-          secret_access_key: "$SECRET_KEY"
-    EOF
-
-        bosh remove-blob $OLD_V6_BLOB_PATH
-
-        bosh add-blob ../v6-cli-binary/cf-cli_${LATEST_V6_CLI_VERSION}_linux_x86-64.tgz cf-cli_${LATEST_V6_CLI_VERSION}_linux_x86-64.tgz
-        bosh upload-blobs
-
-        git add config/blobs.yml
-        git status
-        git commit -m "bump v6 cli to ${LATEST_V6_CLI_VERSION}"
-      else
-        echo "Release has latest v6 CLI version, skipping bump."
-      fi
-    )
 
     echo "Checking if V7 CLI has been upgraded..."
     (

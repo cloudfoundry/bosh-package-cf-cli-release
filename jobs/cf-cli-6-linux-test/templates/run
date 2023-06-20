@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-export PATH=/var/vcap/packages/cf-cli-6-linux/bin:$PATH
-
-cf -v

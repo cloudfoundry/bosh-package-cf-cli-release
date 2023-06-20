@@ -27,13 +27,6 @@ resources:
     hostname: environments.toolsmiths.cf-app.com
     pool_name: cf-deployment
 
-- name: v6-cli-binary-linux-64
-  type: s3
-  source:
-    bucket: cf-cli-releases
-    regexp: releases/v(.*)/cf-cli_(.*)_linux_x86-64.tgz
-    region_name: us-west-1
-
 - name: v7-cli-binary-linux-64
   type: s3
   source:
@@ -72,8 +65,6 @@ jobs:
     plan:
       - in_parallel:
         - get: cf-cli-release
-        - get: v6-cli-binary-linux-64
-          trigger: true
         - get: v7-cli-binary-linux-64
           trigger: true
         - get: v8-cli-binary-linux-64
@@ -81,7 +72,6 @@ jobs:
       - task: bump-cli
         file: cf-cli-release/ci/tasks/bump-cli-release.yml
         input_mapping:
-          v6-cli-binary: v6-cli-binary-linux-64
           v7-cli-binary: v7-cli-binary-linux-64
           v8-cli-binary: v8-cli-binary-linux-64
           cf-cli-release-input: cf-cli-release

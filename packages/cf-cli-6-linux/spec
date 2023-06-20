@@ -1,5 +1,0 @@
----
-name: cf-cli-6-linux
-
-files:
-- cf-cli_6.*_linux_x86-64.tgz
