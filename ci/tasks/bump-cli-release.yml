@@ -49,6 +49,7 @@ run:
         options:
           access_key_id: "$ACCESS_KEY_ID"
           secret_access_key: "$SECRET_KEY"
+          assume_role_arn: "$AWS_ROLE_ARN"
     EOF
 
         bosh remove-blob $OLD_V6_BLOB_PATH
@@ -78,6 +79,7 @@ run:
         options:
           access_key_id: "$ACCESS_KEY_ID"
           secret_access_key: "$SECRET_KEY"
+          assume_role_arn: "$AWS_ROLE_ARN"
     EOF
 
         bosh remove-blob $OLD_V7_BLOB_PATH
@@ -107,6 +109,7 @@ run:
         options:
           access_key_id: "$ACCESS_KEY_ID"
           secret_access_key: "$SECRET_KEY"
+          assume_role_arn: "$AWS_ROLE_ARN"
     EOF
 
         bosh remove-blob $OLD_V8_BLOB_PATH

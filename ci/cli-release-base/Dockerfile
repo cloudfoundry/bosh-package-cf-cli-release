@@ -2,7 +2,7 @@ FROM ubuntu:trusty
 
 # Last updated on 2020-7-16, if updated again please add concourse automation
 # to bump versions of these binaries: https://www.pivotaltracker.com/n/projects/2450704/stories/173838043
-ENV bosh_cli_version 7.1.3
+ENV bosh_cli_version 7.2.3
 ENV bbl_version 8.4.111
 ENV terraform_version 0.11.5
 
