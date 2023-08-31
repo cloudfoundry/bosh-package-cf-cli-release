@@ -11,6 +11,12 @@ resource_types:
     repository: concourse/semver-resource
     tag: latest
 
+- name: s3
+  type: docker-image
+  source:
+    repository: concourse/s3-resource
+    tag: latest
+
 resources:
 - name: cf-cli-release
   type: git
