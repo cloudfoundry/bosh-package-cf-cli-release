@@ -7,12 +7,26 @@ resources:
     private_key: {{release-repo-github-key}}
     branch: main
 
-- name: cli
+- name: v6-cli
   type: git
   source:
     uri: git@github.com:cloudfoundry/cli
     private_key: {{release-repo-github-key}}
-    branch: main
+    branch: v6
+
+- name: v7-cli
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/cli
+    private_key: {{release-repo-github-key}}
+    branch: v7
+
+- name: v8-cli
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/cli
+    private_key: {{release-repo-github-key}}
+    branch: v8
 
 - name: concourse-cve-scan
   type: git
@@ -34,15 +48,41 @@ jobs:
     params:
       GRYPE_FAILURE_LEVEL: critical
 
-- name: check-for-cves-cli
+- name: check-for-cves-cli-v6
   plan:
   - in_parallel:
       - get: concourse-cve-scan
-      - get: cli
+      - get: v6-cli
         trigger: true
   - task: scan-with-syft-and-grype
     input_mapping:
-      bosh-release-repo: cli
+      bosh-release-repo: v6-cli
+    file: concourse-cve-scan/tasks/scan-for-cves/scan-for-cves.yml
+    params:
+      GRYPE_FAILURE_LEVEL: critical
+
+- name: check-for-cves-cli-v7
+  plan:
+  - in_parallel:
+      - get: concourse-cve-scan
+      - get: v7-cli
+        trigger: true
+  - task: scan-with-syft-and-grype
+    input_mapping:
+      bosh-release-repo: v7-cli
+    file: concourse-cve-scan/tasks/scan-for-cves/scan-for-cves.yml
+    params:
+      GRYPE_FAILURE_LEVEL: critical
+
+- name: check-for-cves-cli-v8
+  plan:
+  - in_parallel:
+      - get: concourse-cve-scan
+      - get: v8-cli
+        trigger: true
+  - task: scan-with-syft-and-grype
+    input_mapping:
+      bosh-release-repo: v8-cli
     file: concourse-cve-scan/tasks/scan-for-cves/scan-for-cves.yml
     params:
       GRYPE_FAILURE_LEVEL: critical
