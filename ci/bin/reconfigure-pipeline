@@ -34,3 +34,4 @@ pipelines_path=$(cd $(dirname $0)/.. && pwd)
 
 configure_pipeline cf-cli-release $pipelines_path/pipeline.yml
 configure_pipeline cf-cli-release-toolsmiths $pipelines_path/pipeline-toolsmiths.yml
+configure_pipeline cf-cli-scan $pipelines_path/scanning.yml

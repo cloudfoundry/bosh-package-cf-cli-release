@@ -1,0 +1,48 @@
+---
+resources:
+- name: release
+  type: git
+  source:
+    uri: git@github.com:bosh-packages/cf-cli-release
+    private_key: {{release-repo-github-key}}
+    branch: main
+
+- name: cli
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/cli
+    private_key: {{release-repo-github-key}}
+    branch: main
+
+- name: concourse-cve-scan
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-incubator/concourse-cve-scan.git
+    branch: main
+
+jobs:
+- name: check-for-cves-release
+  plan:
+  - in_parallel:
+      - get: concourse-cve-scan
+      - get: release
+        trigger: true
+  - task: scan-with-syft-and-grype
+    input_mapping:
+      bosh-release-repo: release
+    file: concourse-cve-scan/tasks/scan-for-cves/scan-for-cves.yml
+    params:
+      GRYPE_FAILURE_LEVEL: critical
+
+- name: check-for-cves-cli
+  plan:
+  - in_parallel:
+      - get: concourse-cve-scan
+      - get: cli
+        trigger: true
+  - task: scan-with-syft-and-grype
+    input_mapping:
+      bosh-release-repo: cli
+    file: concourse-cve-scan/tasks/scan-for-cves/scan-for-cves.yml
+    params:
+      GRYPE_FAILURE_LEVEL: critical
