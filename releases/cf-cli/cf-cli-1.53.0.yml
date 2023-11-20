@@ -1,0 +1,58 @@
+name: cf-cli
+version: 1.53.0
+commit_hash: 3b36656
+uncommitted_changes: false
+jobs:
+- name: cf-cli-6-linux
+  version: a59a654552fffc5c5a86a4362bd2fdc60b8b86654f31f2442ccdc83fe47cc106
+  fingerprint: a59a654552fffc5c5a86a4362bd2fdc60b8b86654f31f2442ccdc83fe47cc106
+  sha1: sha256:7d58fe2ab255515c807423fe78da5fec84690a5a4f352788c6fc5b4519391d4a
+  packages:
+  - cf-cli-6-linux
+- name: cf-cli-6-linux-test
+  version: e00267f1a414cc14f9398153d139d4f84e4bf9d8fbac136b778d405c4a7dafd2
+  fingerprint: e00267f1a414cc14f9398153d139d4f84e4bf9d8fbac136b778d405c4a7dafd2
+  sha1: sha256:90ee9f9ac873b1b9b55a156c413f18a1d0ac57fa9b6e7aa362d98564290a5d92
+  packages: []
+- name: cf-cli-7-linux
+  version: 72f1e1ed527093a87feee05451d68e3654c5b326cd70df97b16f8885aef76d9a
+  fingerprint: 72f1e1ed527093a87feee05451d68e3654c5b326cd70df97b16f8885aef76d9a
+  sha1: sha256:f33f9c6f5bbc80ddb799fe2fd0cec8f262afb644cf5b49df8a4863071874f0e1
+  packages:
+  - cf-cli-7-linux
+- name: cf-cli-7-linux-test
+  version: 2bf08924ce324cee14b9b932e66929328038de9ffa9000b72835e9b427588d46
+  fingerprint: 2bf08924ce324cee14b9b932e66929328038de9ffa9000b72835e9b427588d46
+  sha1: sha256:9a572d38027dd28042e15e15de4261aad5aec812475284e2c29f87202c7863b8
+  packages: []
+- name: cf-cli-8-linux
+  version: ca67b6ff6fa10594b63e220043ab7fa0c1e705b0061990dce171202e4b887b90
+  fingerprint: ca67b6ff6fa10594b63e220043ab7fa0c1e705b0061990dce171202e4b887b90
+  sha1: sha256:0fb35df089eb5b27a568cd087539648bf479d91113f229bbf9c9c451db47204e
+  packages:
+  - cf-cli-8-linux
+- name: cf-cli-8-linux-test
+  version: bdf2b10e03ed3a0a93724c7dd802c0f24ad5c4433ec34266fa87b93cf3282c4b
+  fingerprint: bdf2b10e03ed3a0a93724c7dd802c0f24ad5c4433ec34266fa87b93cf3282c4b
+  sha1: sha256:fbc0dae626da53802dea64238335dbb770d8895e895b2443f1026cc384f6a605
+  packages: []
+packages:
+- name: cf-cli-6-linux
+  version: 953a0bac1fab1b12c2501ae1744909b3914aa1473f54e1a2c7142285919aa365
+  fingerprint: 953a0bac1fab1b12c2501ae1744909b3914aa1473f54e1a2c7142285919aa365
+  sha1: sha256:efb3d8511ff4f5da800b3a759b60dbec1817a8a20a0a87d18f969b6046562d6b
+  dependencies: []
+- name: cf-cli-7-linux
+  version: cdcb9c12375838c3cc8daeb69ac4559f492caabf3a07f902346d7ee86900edbe
+  fingerprint: cdcb9c12375838c3cc8daeb69ac4559f492caabf3a07f902346d7ee86900edbe
+  sha1: sha256:c4bc15f43d7c8f13d0b0d851209d7139ac4140f1bc23f13c8fe4ea67de64e97c
+  dependencies: []
+- name: cf-cli-8-linux
+  version: b7156507962b16b029ebf58e7c6837686e4b1f617a35faaa654c0c71cd341146
+  fingerprint: b7156507962b16b029ebf58e7c6837686e4b1f617a35faaa654c0c71cd341146
+  sha1: sha256:3b87905738c1f75d01aa872173df9de6e87eb04ef6fd11afc5e5df61220d1324
+  dependencies: []
+license:
+  version: 70774449f897cf766b941032580909f941852dbf78e0842b0c79715ecdcc481f
+  fingerprint: 70774449f897cf766b941032580909f941852dbf78e0842b0c79715ecdcc481f
+  sha1: sha256:7d8dfcc96511226ec42c7906799efe3f50e75238a4de5f7a740522174d1745fe
