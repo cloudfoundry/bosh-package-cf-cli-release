@@ -5,6 +5,18 @@ resource_types:
   source:
     repository: cftoolsmiths/toolsmiths-envs-resource
 
+- name: semver
+  type: docker-image
+  source:
+    repository: concourse/semver-resource
+    tag: latest
+
+- name: s3
+  type: docker-image
+  source:
+    repository: concourse/s3-resource
+    tag: latest
+
 resources:
 - name: cf-cli-release
   type: git
@@ -63,7 +75,7 @@ resources:
   source:
     access_key_id: ((release-bucket-access-key-id))
     secret_access_key: ((release-bucket-secret-key))
-    aws_role_arn: ((release-bucket-role-arn))
+    assume_role_arn: ((release-bucket-role-arn))
     initial_version: 1.1.0
     bucket: cf-cli-bosh-release
     key: version
