@@ -26,7 +26,7 @@ jobs:
             ls -lah subdir
 
         - name: Setup upterm session
-          if: always() && ${{ github.event.inputs.debug }}
+          if: ${{ github.event.inputs.debug }}
           uses: lhotari/action-upterm@v1
           timeout-minutes: 60
     
