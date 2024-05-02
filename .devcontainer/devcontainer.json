@@ -1,5 +1,20 @@
 {
+  "name": "Cloudfoundry CLI Bosh Release",
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
-  }
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {},
+      "extensions": [
+        "editorconfig.editorconfig",
+        "DavidAnson.vscode-markdownlint",
+        "GitHub.vscode-pull-request-github",
+        "GitHub.copilot",
+        "MS-vsliveshare.vsliveshare"
+      ]
+    }
+  },
+  "postCreateCommand": ""
 }
