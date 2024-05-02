@@ -26,7 +26,7 @@ jobs:
             ls -lah subdir
 
         - name: Setup upterm session
-          if: env.DEBUG_MODE == 'true'
+          if: ${{ runner.debug }}
           uses: lhotari/action-upterm@v1
           timeout-minutes: 60
     
