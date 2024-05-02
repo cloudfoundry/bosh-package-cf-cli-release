@@ -27,7 +27,7 @@ jobs:
             exit 1
 
         - name: Setup upterm session
-          if: ${{ runner.debug }}
+          if: ${{ always() && runner.debug }}
           uses: lhotari/action-upterm@v1
           timeout-minutes: 60
     
