@@ -1,0 +1,102 @@
+name: Create Release
+on:
+  workflow_dispatch:
+  push:
+    tags:
+    - "v9.*"
+    - "v8.*"
+    - "v7.*"
+
+jobs:
+  acquire_binaries:
+    runs-on: ubuntu-latest
+    steps:
+        # - name: Detect latest version under major blah
+
+        - name: Get latest V8 release from github
+          uses: dsaltares/fetch-gh-release-asset@master
+          with:
+            repo: 'dsaltares/godot-wild-jam-18'
+            version: 'tags/v0.1.18'
+            regex: true
+            file: "plague-.*\\.zip"
+            target: 'subdir/'
+            token: ${{ secrets.GITHUB_TOKEN }}
+        
+        - name: Setup upterm session
+          if: always()
+          uses: lhotari/action-upterm@v1
+          timeout-minutes: 60
+    
+    #   - name: Download Release from S3
+    #     uses: keithweaver/aws-s3-github-action@v1.0.0
+    #     with:
+    #       command: cp
+    #       source: s3://cf-cli-bosh-release/cf-cli-v${{ github.event.inputs.release_version }}.tgz
+    #       destination: ./cf-cli-v${{ github.event.inputs.release_version }}.tgz
+    #       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #       aws_region: us-west-1
+    #   - name: Upload Release to Github
+    #     uses: pivotalsoftware/action-gh-release@v1
+    #     with:
+    #       draft: true
+    #       name: "DRAFT v${{ github.event.inputs.release_version }}"
+    #       tag_name: "v${{ github.event.inputs.release_version }}"
+    #       repository: bosh-packages/cf-cli-release # repo to draft a release under
+    #       fail_on_unmatched_files: true
+    #       files: ./cf-cli-v${{ github.event.inputs.release_version }}.tgz
+
+
+
+# - name: v6-cli-binary-linux-64
+#   type: s3
+#   source:
+#     bucket: cf-cli-releases
+#     regexp: releases/v(.*)/cf-cli_(.*)_linux_x86-64.tgz
+#     region_name: us-west-1
+
+# - name: v7-cli-binary-linux-64
+#   type: s3
+#   source:
+#     bucket: v7-cf-cli-releases
+#     regexp: releases/v(.*)/cf7-cli_(.*)_linux_x86-64.tgz
+#     region_name: us-west-1
+
+# - name: v8-cli-binary-linux-64
+#   type: s3
+#   source:
+#     bucket: v8-cf-cli-releases
+#     regexp: releases/v(.*)/cf8-cli_(.*)_linux_x86-64.tgz
+#     region_name: us-west-1
+
+# - name: candidate-release
+#   type: s3
+#   source:
+#     bucket: cf-cli-bosh-release
+#     versioned_file: cf-cli-dev-release.tgz
+#     access_key_id: ((release-bucket-access-key-id))
+#     secret_access_key: ((release-bucket-secret-key))
+#     aws_role_arn: ((release-bucket-role-arn))
+#     region_name: us-west-1
+
+# - name: release-version
+#   type: semver
+#   source:
+#     access_key_id: ((release-bucket-access-key-id))
+#     secret_access_key: ((release-bucket-secret-key))
+#     assume_role_arn: ((release-bucket-role-arn))
+#     initial_version: 1.1.0
+#     bucket: cf-cli-bosh-release
+#     key: version
+#     region_name: us-west-1
+
+# - name: cf-cli-release-final-tarball
+#   type: s3
+#   source:
+#     bucket: cf-cli-bosh-release
+#     regexp: cf-cli-v(1\.\d+\.\d+)\.tgz
+#     access_key_id: {{release-bucket-access-key-id}}
+#     secret_access_key: {{release-bucket-secret-key}}
+#     aws_role_arn: ((release-bucket-role-arn))
+#     region_name: us-west-1
