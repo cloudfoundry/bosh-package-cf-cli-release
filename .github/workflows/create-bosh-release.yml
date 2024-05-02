@@ -26,8 +26,13 @@ jobs:
             ls -lah subdir
             exit 1
 
+        - name: List artifacts
+          run: |
+            ls -lah subdir
+            exit 0
+
         - name: Setup upterm session
-          if: ${{ always() && runner.debug }}
+          if: !success()
           uses: lhotari/action-upterm@v1
           timeout-minutes: 60
     
