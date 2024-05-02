@@ -3,9 +3,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-    - "v9.*"
-    - "v8.*"
-    - "v7.*"
+    - "187042013-release-workflow"
 
 jobs:
   acquire_binaries:
