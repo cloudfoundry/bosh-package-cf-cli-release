@@ -24,6 +24,7 @@ jobs:
         - name: List artifacts
           run: |
             ls -lah subdir
+            exit 1
 
         - name: Setup upterm session
           if: ${{ runner.debug }}
