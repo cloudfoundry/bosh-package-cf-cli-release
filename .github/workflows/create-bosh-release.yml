@@ -23,6 +23,10 @@ jobs:
             target: 'subdir/'
             token: ${{ secrets.GITHUB_TOKEN }}
         
+        - name: List artifacts
+          run: |
+            ls -lah subdir
+
         - name: Setup upterm session
           if: always()
           uses: lhotari/action-upterm@v1
