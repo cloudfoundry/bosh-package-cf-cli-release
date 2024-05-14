@@ -1,41 +1,65 @@
 name: Create Release
 on:
   workflow_dispatch:
-  push:
-    branches:
-    - "187042013-release-workflow"
+  # push:
+  #   branches:
+  #   - "187042013-release-workflow"
 
 jobs:
   acquire_binaries:
     runs-on: ubuntu-latest
     steps:
-        # - name: Detect latest version under major blah
 
-        - name: Get latest V8 release from github
-          uses: dsaltares/fetch-gh-release-asset@master
-          with:
-            repo: 'dsaltares/godot-wild-jam-18'
-            version: 'tags/v0.1.18'
-            regex: true
-            file: "plague-.*\\.zip"
-            target: 'subdir/'
-            token: ${{ secrets.GITHUB_TOKEN }}
+        # - name: Get latest V8 release from github
+        #   uses: dsaltares/fetch-gh-release-asset@master
+        #   with:
+        #     repo: 'dsaltares/godot-wild-jam-18'
+        #     version: 'tags/v0.1.18'
+        #     regex: true
+        #     file: "plague-.*\\.zip"
+        #     target: 'subdir/'
+        #     token: ${{ secrets.GITHUB_TOKEN }}
         
+        # - name: List artifacts
+        #   run: |
+        #     ls -lah subdir
+        #     exit 1
+
+
+        # - name: List artifacts exit 0
+        #   run: |
+        #     ls -lah subdir
+        #     exit 0
+
+        - name: Checkout cli bosh release repo
+          run: echo hi
+
+        - name: Acquire latest linux binary for V6,7, and 8
+          run: echo hi
+
+        - name: Create bosh release candidate
+          run: echo hi
+
+        - name: |
+            Test Bosh release
+            - Claim Shepherd env
+            - Deploy release candidate
+            - Run tests
+            - Unclaim Sheperd env
+          run: echo hi
+
+        - name: Finalize release
+          run: echo hi
+
         - name: List artifacts
           run: |
-            ls -lah subdir
-            exit 1
+            ls -lah
 
-        - name: List artifacts exit 0
-          run: |
-            ls -lah subdir
-            exit 0
-
-        - name: Setup upterm session
-          # if: ${{ always() && runner.debug }}
-          if: ${{ failure() }}
-          uses: lhotari/action-upterm@v1
-          timeout-minutes: 60
+        # - name: Setup upterm session
+        #   # if: ${{ always() && runner.debug }}
+        #   if: ${{ failure() }}
+        #   uses: lhotari/action-upterm@v1
+        #   timeout-minutes: 60
     
     #   - name: Download Release from S3
     #     uses: keithweaver/aws-s3-github-action@v1.0.0
