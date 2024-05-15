@@ -1,9 +1,9 @@
 name: Create Release
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #   - "187042013-release-workflow"
+  push:
+    branches:
+    - "187042013-release-workflow"
 
 jobs:
   acquire_binaries:
@@ -20,17 +20,6 @@ jobs:
         #     target: 'subdir/'
         #     token: ${{ secrets.GITHUB_TOKEN }}
         
-        # - name: List artifacts
-        #   run: |
-        #     ls -lah subdir
-        #     exit 1
-
-
-        # - name: List artifacts exit 0
-        #   run: |
-        #     ls -lah subdir
-        #     exit 0
-
         - name: Checkout cli bosh release repo
           run: echo hi
 
