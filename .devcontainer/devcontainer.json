@@ -16,5 +16,5 @@
       ]
     }
   },
-  "postCreateCommand": ""
+  "postCreateCommand": "gh extension install https://github.com/nektos/gh-act && sudo apt update && sudo apt install --yes fzf entr"
 }
