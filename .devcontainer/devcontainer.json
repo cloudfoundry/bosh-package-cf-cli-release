@@ -1,6 +1,6 @@
 {
   "name": "Cloudfoundry CLI Bosh Release",
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "dockerFile": "Dockerfile",
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
@@ -16,5 +16,6 @@
       ]
     }
   },
-  "postCreateCommand": "gh extension install https://github.com/nektos/gh-act && sudo apt update && sudo apt install --yes fzf entr"
+  "postCreateCommand": ""
+
 }
