@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Acquire latest CF CLI V8 linux binary
-      run: |
-        curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow" | tar -zx
-        ./cf version
+    # - name: Acquire latest CF CLI V8 linux binary
+    #   run: |
+    #     curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow" | tar -zx
+    #     ./cf version
 
     # - name: Acquire latest CF CLI V8 linux binary
     #   run: |
@@ -98,6 +98,12 @@ jobs:
         ## apt-get update
         ## apt-get install -y build-essential
 
+    - name: Acquire latest CF CLI V8 linux binary
+      run: |
+        wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
+        tar -xvzf cf8-cli_*_linux_x86-64.tgz --wildcards 'cf*'
+        ./cf version
+
     - name: Create bosh release candidate
       env:
         AWS_REGION:            ${{ vars.AWS_REGION }}
@@ -130,8 +136,8 @@ jobs:
         git commit -m "bump v6 cli to ${LATEST_V6_CLI_VERSION}"
         echo else 
         echo "Release has latest v6 CLI version, skipping bump."
-        git log -5
-    # - name: |
+    #     git log -5
+    # # - name: |
     #     Test Bosh release
     #     - Claim Shepherd env
     #     - Deploy release candidate
