@@ -1,3 +1,6 @@
+lint:
+	act -W .github/workflows/lint.yml
+
 run:
 	ls .github/**/* | entr -c \
 	  act --secret      GITHUB_TOKEN="$(gh auth token)" \
