@@ -10,11 +10,14 @@
     "vscode": {
       "settings": {},
       "extensions": [
-        "editorconfig.editorconfig",
         "DavidAnson.vscode-markdownlint",
-        "GitHub.vscode-pull-request-github",
         "GitHub.copilot",
-        "MS-vsliveshare.vsliveshare"
+        "GitHub.vscode-pull-request-github",
+        "editorconfig.editorconfig",
+        "github.vscode-github-actions",
+        "ms-vscode.makefile-tools",
+        "ms-vsliveshare.vsliveshare",
+        "timonwong.shellcheck"
       ]
     }
   },
