@@ -18,6 +18,5 @@
       ]
     }
   },
-  "postCreateCommand": ""
-
+  "postCreateCommand": "sudo apt update && sudo apt install shellcheck"
 }
