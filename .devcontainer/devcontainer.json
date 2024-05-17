@@ -17,7 +17,8 @@
         "github.vscode-github-actions",
         "ms-vscode.makefile-tools",
         "ms-vsliveshare.vsliveshare",
-        "timonwong.shellcheck"
+        "timonwong.shellcheck",
+        "vmware.vscode-concourse"
       ]
     }
   },
