@@ -6,40 +6,38 @@ on:
   #   - "187042013-release-workflow"
 
 jobs:
+  # acquire_binaries:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Acquire latest CF CLI V8 linux binary
+  #     run: |
+  #       curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow" | tar -zx
+  #       ./cf version
 
-  acquire_binaries:
-    runs-on: ubuntu-latest
-    steps:
+  #   - name: Acquire latest CF CLI V8 linux binary
+  #     run: |
+  #       curl -L -o linux-binary-v8.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
+  #       tar -xvzf linux-binary-v8.tgz --wildcards 'cf*'
+  #       ./cf version
 
-    # - name: Acquire latest CF CLI V8 linux binary
-    #   run: |
-    #     curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow" | tar -zx
-    #     ./cf version
+  #   - name: Acquire latest CF CLI V7 linux binary
+  #     run: |
+  #       curl -L -o linux-binary-v7.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow"
+  #       tar -xvzf linux-binary-v7.tgz --wildcards 'cf*'
+  #       ./cf version
 
-    # - name: Acquire latest CF CLI V8 linux binary
-    #   run: |
-    #     curl -L -o linux-binary-v8.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
-    #     tar -xvzf linux-binary-v8.tgz --wildcards 'cf*'
-    #     ./cf version
+  #   - name: Acquire latest CF CLI V6 linux binary
+  #     run: |
+  #       curl -L -o linux-binary-v6.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v6&source=bosh-package-cf-cli-release-workflow"
+  #       tar -xvzf linux-binary-v6.tgz --wildcards 'cf*'
+  #       ./cf version
 
-    # - name: Acquire latest CF CLI V7 linux binary
-    #   run: |
-    #     curl -L -o linux-binary-v7.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow"
-    #     tar -xvzf linux-binary-v7.tgz --wildcards 'cf*'
-    #     ./cf version
-
-    # - name: Acquire latest CF CLI V6 linux binary
-    #   run: |
-    #     curl -L -o linux-binary-v6.tgz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v6&source=bosh-package-cf-cli-release-workflow"
-    #     tar -xvzf linux-binary-v6.tgz --wildcards 'cf*'
-    #     ./cf version
-
-    # - name: Store Linux Binaries
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     if-no-files-found: error
-    #     name: cf-cli-linux-binaries
-    #     path: cf[0-9]
+  #   - name: Store Linux Binaries
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       if-no-files-found: error
+  #       name: cf-cli-linux-binaries
+  #       path: cf[0-9]
 
   bosh_release_create_candidate:
     runs-on: ubuntu-latest

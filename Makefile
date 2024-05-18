@@ -1,3 +1,6 @@
+ensure-ci-image:
+	act --actor "${GITHUB_USER}" --secret GITHUB_TOKEN="${GITHUB_TOKEN}" -W .github/workflows/ensure-ci-image.yml
+
 lint:
 	act -W .github/workflows/lint.yml
 
