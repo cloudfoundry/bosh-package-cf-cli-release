@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [[ "${TRACE-0}" == "1" ]]; then
+if [[ "${TRACE:-0}" == "1" ]]; then
     set -o xtrace
 fi
 
@@ -19,8 +19,12 @@ OLD_BLOB_PATH=$(bosh blobs --column=path | grep "${prefix:?}")
 OLD_CLI_VERSION=$(echo "${OLD_BLOB_PATH:?}" | cut -d_ -f2)
 
 if [[ "${OLD_CLI_VERSION:?}" != "${LATEST_CLI_VERSION:?}" ]]; then
-    git config --global user.email cf-cli-eng@pivotal.io
-    git config --global user.name "CI Bot"
+    git config user.email "${GITHUB_ACTOR}+github-actions[bot]@users.noreply.github.com"
+    git config user.name "github-actions[bot]"
+
+    echo "foo: ${GITHUB_ACTOR}, ${GITHUB_TOKEN}"
+
+    git remote set-url --push origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
     bosh remove-blob "${OLD_BLOB_PATH}"
 
@@ -30,6 +34,7 @@ if [[ "${OLD_CLI_VERSION:?}" != "${LATEST_CLI_VERSION:?}" ]]; then
     git add config/blobs.yml
     git status
     git commit -m "bump v8 cli to ${LATEST_CLI_VERSION}"
+    git push origin HEAD:foo
 else
     echo "Release has latest v8 CLI version, skipping bump."
 fi
