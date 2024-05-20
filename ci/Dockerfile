@@ -1,5 +1,10 @@
 FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
+RUN latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest \
+  | jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url") && \
+  curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location && \
+  chmod +x $install_location/bosh
+
 RUN apt update && \
   apt install --yes \
     shellcheck && \
