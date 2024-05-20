@@ -21,6 +21,5 @@
         "vmware.vscode-concourse"
       ]
     }
-  },
-  "postCreateCommand": "sudo apt update && sudo apt install shellcheck"
+  }
 }
