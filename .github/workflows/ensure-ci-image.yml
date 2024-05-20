@@ -45,7 +45,7 @@ jobs:
       uses: docker/metadata-action@v5
       id: meta
       with:
-        images: ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}
+        images: ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}-ci
         tags: |
           ${{ env.CI_DOCKERFILE_MOST_RECENT_SHA }}
           ${{ github.ref_name }}-latest
