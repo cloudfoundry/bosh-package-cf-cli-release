@@ -4,33 +4,18 @@ ENV bosh_cli_version 7.2.3
 ENV bbl_version 8.4.111
 ENV terraform_version 0.11.5
 
+RUN apt list --installed
+
+# TODO: Prune this down to the minimum necessary packages.
+# A lot of this will be included by default in the Microsoft dev container.
 RUN \
   apt-get update && \
   apt-get -y install \
-    build-essential \
-    git \
-    libreadline6 \
-    libreadline6-dev \
-    libsqlite3-dev \
-    libssl-dev \
     libxml2-dev \
     libxslt-dev \
     libyaml-dev \
-    openssl \
     shellcheck \
-    software-properties-common \
-    sqlite \
-    unzip \
-    wget \
-    curl \
-    zlib1g-dev \
-    zlibc && \
-  add-apt-repository ppa:brightbox/ruby-ng -y && \
-  apt-get update && \
-  apt-get -y install \
-    ruby2.3 \
-    ruby2.3-dev && \
-  apt-get remove -y --purge software-properties-common  && \
+    sqlite && \
   apt list --installed
 
 # bosh-cli
