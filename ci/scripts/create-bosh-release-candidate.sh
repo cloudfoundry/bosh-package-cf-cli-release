@@ -11,7 +11,13 @@ fi
 pwd
 git config --global --add safe.directory .
 
-ls -l v8-cli-binary
+git status
+git fetch
+git status
+git add config/blobs.yml
+git status
+echo hooray
+exit 0
 
 prefix="cf8-cli"
 LATEST_CLI_VERSION=$(ls -1 v8-cli-binary | grep "^${prefix:?}" | cut -d_ -f2)
