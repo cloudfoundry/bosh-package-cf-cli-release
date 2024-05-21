@@ -126,7 +126,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TRACE: 1
 
-      run: ./ci/scripts/create-bosh-release-candidate.sh
+      run: git status
         # echo AWS_REGION: "${AWS_REGION}"
         # echo AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
         # echo AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
