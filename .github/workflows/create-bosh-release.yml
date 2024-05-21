@@ -44,9 +44,6 @@ jobs:
     container:
       image: 'ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:187042013-release-workflow-latest'
 
-    permissions:
-      contents: read
-
     steps:
 
 
@@ -123,7 +120,7 @@ jobs:
         AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         # GITHUB_USERNAME: ${{ github.actor }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TRACE: 1
 
       run: git status
