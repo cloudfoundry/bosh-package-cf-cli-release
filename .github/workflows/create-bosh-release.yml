@@ -5,6 +5,9 @@ on:
 jobs:
   bosh_release_create_candidate:
     runs-on: ubuntu-latest
+    container:
+      image: 'mcr.microsoft.com/devcontainers/base:ubuntu'
+
     steps:
     - name: Checkout cli bosh release repo
       uses: actions/checkout@v4
