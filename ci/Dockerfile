@@ -15,6 +15,7 @@ RUN \
     libxslt-dev \
     libyaml-dev \
     neovim \
+    nodejs \
     shellcheck \
     sqlite \
     tmux && \

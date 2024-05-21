@@ -10,7 +10,7 @@ env:
   CI_DOCKERFILE_MOST_RECENT_SHA: # Determined dynamically later on
 
 jobs:
-  calculate-latest-image:
+  build-and-push-ci-image:
     runs-on: ubuntu-latest
     permissions:
       contents: read
