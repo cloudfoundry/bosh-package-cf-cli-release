@@ -63,42 +63,42 @@ jobs:
     - name: Checkout cli bosh release repo
       uses: actions/checkout@v4
 
-    #- name: Install bosh cli
-      #env:
-        #BOSH_CLI_VERSION:            ${{ vars.BOSH_CLI_VERSION }}
+    # - name: Install bosh cli
+    #   env:
+    #     BOSH_CLI_VERSION:            ${{ vars.BOSH_CLI_VERSION }}
 
-      #run: |
-        #install_location=/usr/local/bin
-        ## bosh_cli_artifact=bosh-cli-7.0.1-linux-amd64
-        ## bbl_artifact=bbl-v8.4.110_linux_x86-64
-        ## credhub_artifact=credhub-linux-2.9.4.tgz
+    #   run: |
+    #     install_location=/usr/local/bin
+    #     bosh_cli_artifact=bosh-cli-7.0.1-linux-amd64
+    #     bbl_artifact=bbl-v8.4.110_linux_x86-64
+    #     credhub_artifact=credhub-linux-2.9.4.tgz
       
-        ## curl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.110/${bbl_artifact} --silent --location --output  $install_location/bbl
-        ## chmod +x $install_location/bbl
-        ## bbl --version
+    #     curl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.110/${bbl_artifact} --silent --location --output  $install_location/bbl
+    #     chmod +x $install_location/bbl
+    #     bbl --version
 
-        ## curl https://s3.amazonaws.com/bosh-cli-artifacts/$bosh_cli_artifact --silent --output $install_location/bosh --location
-        ## chmod +x $install_location/bosh
-        ## bosh --version
+    #     curl https://s3.amazonaws.com/bosh-cli-artifacts/$bosh_cli_artifact --silent --output $install_location/bosh --location
+    #     chmod +x $install_location/bosh
+    #     bosh --version
 
-        ## curl "https://storage.googleapis.com/bosh-cli-artifacts/bosh-cli-#{BOSH_CLI_VERSION:-7.0.1}-linux-amd64" --silent --output $install_location/bosh --location
-        ## chmod +x $install_location/bosh
-        ## bosh --version
+    #     curl "https://storage.googleapis.com/bosh-cli-artifacts/bosh-cli-#{BOSH_CLI_VERSION:-7.0.1}-linux-amd64" --silent --output $install_location/bosh --location
+    #     chmod +x $install_location/bosh
+    #     bosh --version
 
-        #latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest \
-          #| jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
+    #     latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest \
+    #       | jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
 
-        #curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
-        #chmod +x $install_location/bosh
+    #     curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
+    #     chmod +x $install_location/bosh
 
-        ## curl https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.4/$credhub_artifact --silent --output /tmp/$credhub_artifact --location
-        ## tar xzvf /tmp/$credhub_artifact
-        ## mv credhub $install_location/credhub
-        ## chmod +x $install_location/credhub
-        ## credhub --version
+    #     curl https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.4/$credhub_artifact --silent --output /tmp/$credhub_artifact --location
+    #     tar xzvf /tmp/$credhub_artifact
+    #     mv credhub $install_location/credhub
+    #     chmod +x $install_location/credhub
+    #     credhub --version
 
-        ## apt-get update
-        ## apt-get install -y build-essential
+    #     apt-get update
+    #     apt-get install -y build-essential
 
     - name: Acquire latest CF CLI V8 linux binary
       run: |
