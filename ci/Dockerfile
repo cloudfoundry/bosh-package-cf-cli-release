@@ -7,7 +7,7 @@ ENV terraform_version 0.11.5
 RUN apt list --installed
 
 # TODO: Prune this down to the minimum necessary packages.
-# A lot of this will be included by default in the Microsoft dev container.
+# Do we really have functional dependencies on, e.g., libxslt-dev?
 RUN \
   apt-get update && \
   apt-get -y install \
