@@ -14,8 +14,10 @@ RUN \
     libxml2-dev \
     libxslt-dev \
     libyaml-dev \
+    neovim \
     shellcheck \
     sqlite && \
+    tmux && \
   apt list --installed
 
 # bosh-cli
