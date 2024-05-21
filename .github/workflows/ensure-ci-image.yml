@@ -5,7 +5,7 @@ on:
 
 env:
   IMAGE_REGISTRY: ghcr.io
-  CI_DOCKERFILE_DIR: ./ci # Relative to project root
+  CI_DOCKERFILE_DIR: ./ci/cli-release-base # Relative to project root
   CI_DOCKERFILE_PATH: Dockerfile # Relative to CI_DOCKERFILE_DIR
   CI_DOCKERFILE_MOST_RECENT_SHA: # Determined dynamically later on
 
