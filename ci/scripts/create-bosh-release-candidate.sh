@@ -31,6 +31,9 @@ if [[ "${OLD_CLI_VERSION:?}" != "${LATEST_CLI_VERSION:?}" ]]; then
     bosh add-blob "v8-cli-binary/cf8-cli_${LATEST_CLI_VERSION}_linux_x86-64.tgz" "cf8-cli_${LATEST_CLI_VERSION}_linux_x86-64.tgz"
     # bosh upload-blobs
 
+    git status
+    git fetch
+    git status
     git add config/blobs.yml
     git status
     git commit -m "bump v8 cli to ${LATEST_CLI_VERSION}"
