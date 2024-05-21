@@ -15,4 +15,5 @@ jobs:
     - name: Create bosh release candidate
       env:
         TRACE: 1
-      run: env | sort && git status
+        
+      run: ./ci/scripts/create-bosh-release-candidate.sh

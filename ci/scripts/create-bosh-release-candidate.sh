@@ -8,6 +8,9 @@ if [[ "${TRACE:-0}" == "1" ]]; then
     set -o xtrace
 fi
 
+pwd
+git config --global --add safe.directory .
+
 ls -l v8-cli-binary
 
 prefix="cf8-cli"
