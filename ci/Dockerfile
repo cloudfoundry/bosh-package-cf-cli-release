@@ -16,7 +16,7 @@ RUN \
     libyaml-dev \
     neovim \
     shellcheck \
-    sqlite && \
+    sqlite \
     tmux && \
   apt list --installed
 
