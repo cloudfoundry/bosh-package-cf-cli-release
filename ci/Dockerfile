@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu
+FROM summerwind/actions-runner:latest
 
 ENV bosh_cli_version 7.2.3
 ENV bbl_version 8.4.111
