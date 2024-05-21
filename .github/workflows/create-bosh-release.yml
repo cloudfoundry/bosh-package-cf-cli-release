@@ -15,4 +15,4 @@ jobs:
     - name: Create bosh release candidate
       env:
         TRACE: 1
-      run: git status
+      run: env | sort && git status
