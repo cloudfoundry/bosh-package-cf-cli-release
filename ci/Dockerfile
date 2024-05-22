@@ -4,22 +4,15 @@ ENV bosh_cli_version 7.2.3
 ENV bbl_version 8.4.111
 ENV terraform_version 0.11.5
 
-RUN apt list --installed
-
 USER root
+RUN usermod -a -G sudo root
 
-# TODO: Prune this down to the minimum necessary packages.
-# Do we really have functional dependencies on, e.g., libxslt-dev?
 RUN \
+  apt list --installed && \
   apt-get update && \
   apt-get -y install \
-    libxml2-dev \
-    libxslt-dev \
-    libyaml-dev \
-    neovim \
     nodejs \
     shellcheck \
-    sqlite \
     tmux && \
   apt list --installed
 
