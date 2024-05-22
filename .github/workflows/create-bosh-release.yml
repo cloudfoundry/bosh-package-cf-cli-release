@@ -9,16 +9,22 @@ jobs:
       image: 'ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:187042013-release-workflow-latest'
 
     steps:
-    - name: Checkout cli bosh release repo
-      uses: actions/checkout@v4
+    - name: Node
+      run: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+        . $HOME/.nvm/nvm.sh
+        nvm install 22
+        node --version
+        which node
+      
+    # - name: Checkout cli bosh release repo
+    #   uses: actions/checkout@v4
 
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
-      with:
-        wait-timeout-minutes: 15
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
 
-    - name: Create bosh release candidate
-      env:
-        TRACE: 1
+    # - name: Create bosh release candidate
+    #   env:
+    #     TRACE: 1
         
-      run: ./ci/scripts/create-bosh-release-candidate.sh
+    #   run: ./ci/scripts/create-bosh-release-candidate.sh

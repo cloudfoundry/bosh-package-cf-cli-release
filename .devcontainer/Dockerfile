@@ -1,4 +1,4 @@
-FROM ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:908a9ce5470a083bd8b8efb1d42f2f25718a9277
+FROM ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:187042013-release-workflow-latest
 
 RUN apt update && apt install --yes \
     entr \

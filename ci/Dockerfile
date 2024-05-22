@@ -1,21 +1,23 @@
 FROM summerwind/actions-runner:latest
 
-ENV bosh_cli_version 7.2.3
 ENV bbl_version 8.4.111
+ENV bosh_cli_version 7.2.3
+ENV node_version 22.2.0
 ENV terraform_version 0.11.5
 
 USER root
 RUN usermod -a -G sudo root
 
 RUN \
-  apt list --installed && \
   apt-get update && \
   apt-get -y install \
-    nodejs \
     shellcheck \
-    yamllint \
-    tmux && \
+    yamllint && \
   apt list --installed
+
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash && \
+  . $HOME/.nvm/nvm.sh && \
+  nvm install ${node_version}
 
 # bosh-cli
 RUN \

@@ -32,7 +32,7 @@ jobs:
 
         [[ ! -f ${dockerfile_path} ]] && echo "Could not find Dockerfile at ${dockerfile_path}" 1>&2 && exit 1
 
-        echo "ci_dockerfile_latest_sha=$(git log --pretty=format:%H "${dockerfile_path}")" >> $GITHUB_OUTPUT
+        echo "ci_dockerfile_latest_sha=$(git log --max-count 1 --pretty=format:%H "${dockerfile_path}")" >> $GITHUB_OUTPUT
 
   build-and-push-ci-image:
     runs-on: ubuntu-latest
