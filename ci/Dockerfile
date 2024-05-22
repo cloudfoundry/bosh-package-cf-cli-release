@@ -13,6 +13,7 @@ RUN \
   apt-get -y install \
     nodejs \
     shellcheck \
+    yamllint \
     tmux && \
   apt list --installed
 
