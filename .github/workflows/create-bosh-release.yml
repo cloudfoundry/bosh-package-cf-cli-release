@@ -9,19 +9,21 @@ jobs:
       image: 'ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:187042013-release-workflow-latest'
 
     steps:
-    - name: Node
+    - name: Acquire latest CF CLI V8
       run: |
-        node --version
-        which node
-      
-    # - name: Checkout cli bosh release repo
-    #   uses: actions/checkout@v4
+        mkdir -p v8-cli-binary
+        cd v8-cli-binary
+        wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
+        tar -xvzf cf8-cli_*_linux_x86-64.tgz --wildcards 'cf*'
+        ./cf version
+
+    - name: Checkout cli bosh release repo
+      uses: actions/checkout@v4
+
+    - name: Create bosh release candidate
+      env:
+        TRACE: 1
+      run: ./ci/scripts/create-bosh-release-candidate.sh
 
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
-
-    # - name: Create bosh release candidate
-    #   env:
-    #     TRACE: 1
-        
-    #   run: ./ci/scripts/create-bosh-release-candidate.sh
