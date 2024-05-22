@@ -6,6 +6,8 @@ ENV terraform_version 0.11.5
 
 RUN apt list --installed
 
+USER root
+
 # TODO: Prune this down to the minimum necessary packages.
 # Do we really have functional dependencies on, e.g., libxslt-dev?
 RUN \
