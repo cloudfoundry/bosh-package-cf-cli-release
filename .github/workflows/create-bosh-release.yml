@@ -6,14 +6,11 @@ jobs:
   bosh_release_create_candidate:
     runs-on: ubuntu-latest
     container:
-      image: 'ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:187042013-release-workflow-latest'
+      image: 'ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:4f67999d3ba7a146c34c6f4a372ef406b4a52769'
 
     steps:
     - name: Node
       run: |
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-        . $HOME/.nvm/nvm.sh
-        nvm install 22
         node --version
         which node
       

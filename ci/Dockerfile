@@ -17,7 +17,9 @@ RUN \
 
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash && \
   . $HOME/.nvm/nvm.sh && \
-  nvm install ${node_version}
+  nvm install ${node_version} && \
+  command -v node && \
+  export PATH=$(dirname $(command -v node)):$PATH
 
 # bosh-cli
 RUN \
