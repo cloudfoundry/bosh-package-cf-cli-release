@@ -65,7 +65,7 @@ jobs:
         images: ${{ env.IMAGE_REGISTRY }}/${{ github.repository }}-ci
         tags: |
           type=raw,value=${{ needs.calculate-latest-label.outputs.ci_dockerfile_latest_sha }}
-          ${{ github.ref_name }}-latest
+          type=raw,value=${{ github.ref_name }}-latest
 
     - name: Build and push CI image
       uses: docker/build-push-action@v5
