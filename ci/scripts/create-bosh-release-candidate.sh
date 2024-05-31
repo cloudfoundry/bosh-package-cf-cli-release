@@ -1,42 +1,43 @@
 #!/bin/bash
+set -o errexit -o nounset -o pipefail
+[[ "${TRACE:-0}" == "1" ]] && set -o xtrace
 
-set -o errexit
-set -o nounset
-set -o pipefail
+git config --global --add safe.directory "$(pwd)"
 
-if [[ "${TRACE:-0}" == "1" ]]; then
-    set -o xtrace
-fi
+create_bosh_release_candidate() {
+    cli_version_major=$1
 
-prefix="cf8-cli"
-LATEST_CLI_VERSION=$(ls -1 v8-cli-binary | grep "^${prefix:?}" | cut -d_ -f2)
+    latest_cli_version=$(ls -1 v${cli_version_major}-cli-binary | grep "^cf${cli_version_major}-cli" | cut -d_ -f2)
+    old_blob_path=$(bosh blobs --column=path | grep "cf${cli_version_major}-cli" | tr -d '[:space:]')
+    old_cli_version=$(echo "${old_blob_path:?}" | cut -d_ -f2)
 
-bosh blobs --column=path
+    if [[ "${old_cli_version:?}" != "${latest_cli_version:?}" ]]; then
+        git config user.name  "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com "
 
-OLD_BLOB_PATH=$(bosh blobs --column=path | grep "${prefix:?}")
-OLD_CLI_VERSION=$(echo "${OLD_BLOB_PATH:?}" | cut -d_ -f2)
+        echo "Bosh Blobs: initial state"
+        bosh blobs
+        bosh remove-blob "${old_blob_path}"
 
-if [[ "${OLD_CLI_VERSION:?}" != "${LATEST_CLI_VERSION:?}" ]]; then
-    # git config user.email "${GITHUB_ACTOR}+github-actions[bot]@users.noreply.github.com"
-    # git config user.name "github-actions[bot]"
+        echo "Bosh Blobs: without old blob"
+        bosh blobs
+        bosh add-blob "v${cli_version_major}-cli-binary/cf${cli_version_major}-cli_${latest_cli_version}_linux_x86-64.tgz" "cf${cli_version_major}-cli_${latest_cli_version}_linux_x86-64.tgz"
 
-    # echo "foo: ${GITHUB_ACTOR}, ${GITHUB_TOKEN}"
+        echo "Bosh Blobs: added new blob"
+        bosh blobs
+        #TODO: add bosh upload-blobs
 
-    # git remote set-url --push origin "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+        git status
+        git add config/blobs.yml
+        git status
+        git commit -m "bump v${cli_version_major} cli from ${old_cli_version} to ${latest_cli_version}"
 
-    bosh remove-blob "${OLD_BLOB_PATH}"
+        echo "blobs_updated=yes" >> $GITHUB_OUTPUT
+    else
+        echo "Release has latest v${cli_version_major} CLI version, skipping bump."
 
-    bosh add-blob "v8-cli-binary/cf8-cli_${LATEST_CLI_VERSION}_linux_x86-64.tgz" "cf8-cli_${LATEST_CLI_VERSION}_linux_x86-64.tgz"
-    # bosh upload-blobs
+        # echo "blobs_updated=no" >> $GITHUB_OUTPUT
+    fi
 
-    git status
-    git fetch
-    git status
-    git add config/blobs.yml
-    git status
-    git commit -m "bump v8 cli to ${LATEST_CLI_VERSION}"
-    git push
-    echo 'successfully pushed'
-else
-    echo "Release has latest v8 CLI version, skipping bump."
-fi
+    git log -3
+}

@@ -1,3 +1,7 @@
+ifndef GITHUB_USER
+	$(error GITHUB_USER is not set)
+endif
+
 create-bosh-release:
 	act \
 		--actor "${GITHUB_USER}" \
@@ -17,7 +21,7 @@ lint:
 		--workflows .github/workflows/lint.yml
 
 run:
-	ls **/* | entr -c \
+	find . -name '.git' -prune -o -type f -print | entr -c \
 		act \
 			--actor "${GITHUB_USER}" \
 			--secret GITHUB_TOKEN="${GITHUB_TOKEN}" \
