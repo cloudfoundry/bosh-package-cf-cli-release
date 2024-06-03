@@ -18,13 +18,13 @@ jobs:
     - name: Checkout cli bosh release repo
       uses: actions/checkout@v4
 
-    - name: Acquire latest CF CLI V8
-      run: |
-        mkdir -p v8-cli-binary
-        cd v8-cli-binary
-        wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
-        tar -xvzf cf8-cli_*_linux_x86-64.tgz --wildcards 'cf*'
-        ./cf version
+    # - name: Acquire latest CF CLI V8
+    #   run: |
+    #     mkdir -p v8-cli-binary
+    #     cd v8-cli-binary
+    #     wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
+    #     tar -xvzf cf8-cli_*_linux_x86-64.tgz --wildcards 'cf*'
+    #     ./cf version
 
     # - name: Create bosh release candidate
     #   id: create-bosh-release-candidate-step
@@ -52,7 +52,7 @@ jobs:
     #   uses: actions/checkout@v4
 
     - name: Run arbitrary command via configured shepherd
-      uses: pivotal-cf/gha-shepherd@main
+      uses: a-b/gha-shepherd@main
       with:
         debug:        ${{ runner.debug }}
         api_token:    ${{ secrets.API_TOKEN }}
@@ -93,40 +93,18 @@ jobs:
     #     env_id:       ${{ steps.claim-env.outputs.env-id }}
     #     namespace:    tas-devex
 
-    ## Claim Shepherd env
-    # container: us-west2-docker.pkg.dev/shepherd-268822/shepherd2/concourse-resource:latest
-
-    # TODO: extract into a separate action
-    # - id: claim-env
-    #   name: Claim Environment
-    #   env:
-    #     account_token: ${{ secrets.SHEPHERD_SERVICE_ACCOUNT_TOKEN }}
-    #     pool_name: ${{ vars.SHEPHERD_POOL_NAME }}
-    #   run: |
-    #     shepherd login service-account ${account_token}
-    #     lease_id=$(shepherd create lease --duration 8h --pool ${pool_name} --pool-namespace official --namespace tas-devex --json | jq -r .id) 
-
-    #     # Give somtime for the lease to complete. Shepherd may take upto an 3 hours to create an env
-    #     # if the pool is empty.
-    #     count=0
-    #     while [ $count -lt 360 ] ; do
-    #       sleep 30
-    #       status=$(shepherd get lease ${lease_id} --namespace tas-devex --json | jq -r .status)
-    #       if [ $status == "LEASED" ] ; then
-    #         shepherd get lease ${lease_id} --namespace tas-devex --json | jq .output > metadata.json
-    #         break
-    #       elif [ $status == "FAILED" -o $status == "EXPIRED" ] ; then
-    #         echo "There was an error obtaining the lease. Lease status is ${status}."
-    #         exit 1
-    #       else
-    #         echo "Waiting for environment to be ready. Lease status is ${status}."
-    #       fi
-    #       count=$(($count+1))
-    #     done
-
     #     env_name=$(jq -r .name metadata.json)
     #     cat metadata.json | jq -r '.name'
     #     echo "lease-id=$lease_id" >> "${GITHUB_OUTPUT}"
+
+
+
+
+
+
+
+
+
 
     ## Deploy cli bosh release candidate
     # - name: Deploy bosh release candidate
@@ -139,50 +117,52 @@ jobs:
     #     curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
     #     chmod +x $install_location/bosh
 
-    # - name: Unclaim environment
-    #   if: always()
-    #   env:
-    #     account_token: ${{ secrets.SHEPHERD_SERVICE_ACCOUNT_TOKEN }}
-    #   run: |
-    #     shepherd login service-account ${account_token}
-    #     set -x
-    #     shepherd delete lease ${{ steps.claim-env.outputs.lease-id }} --namespace tas-devex
 
-    ## Finalize bosh release
-    ##   Get final release from assets
-    ## Push commit with final release
-    - name: Finalize bosh release
-      # if: steps.create-bosh-release-candidate-step.outputs.blobs_updated == 'yes'
-      # env:
-      #   TRACE: ${{ runner.debug }}
-      # S3 final release config to upload
-      # ACCESS_KEY_ID:
-      # SECRET_KEY:
-      run: |
-        set -o errexit -o nounset -o pipefail
-        [[ "${TRACE:-0}" == "1" ]] && set -o xtrace
 
-        # if [[ "${{ steps.create-bosh-release-candidate-step.outputs.blobs_updated }}" == "yes" ]]; then
-        
-        # echo "Bosh Blobs: initial state"
-        # bosh blobs
 
-        ## Determine next release version number
 
-        # RELEASE_VERSION=$(cat release-version/version)
-        # git config --global --add safe.directory "$(pwd)"
-        # git config user.name  "github-actions[bot]"
-        # git config user.email "41898282+github-actions[bot]@users.noreply.github.com "
 
-        # bosh create-release --final --version="${RELEASE_VERSION}" --tarball="./cf-cli-v${RELEASE_VERSION}.tgz"
 
-        # git add --all
-        # git status
-        # git commit -m "create final release ${RELEASE_VERSION}"
 
-        ls -lah ./candidate-release-output/cf-cli-dev-release.tgz
 
-    - name: Setup tmate session
-      if: ${{ always() && runner.debug }}
-      uses: mxschmitt/action-tmate@v3
-      timeout-minutes: 15
+
+
+#    ## Finalize bosh release
+#    ##   Get final release from assets
+#    ## Push commit with final release
+#    - name: Finalize bosh release
+#      # if: steps.create-bosh-release-candidate-step.outputs.blobs_updated == 'yes'
+#      # env:
+#      #   TRACE: ${{ runner.debug }}
+#      # S3 final release config to upload
+#      # ACCESS_KEY_ID:
+#      # SECRET_KEY:
+#      run: |
+#        set -o errexit -o nounset -o pipefail
+#        [[ "${TRACE:-0}" == "1" ]] && set -o xtrace
+#
+#        # if [[ "${{ steps.create-bosh-release-candidate-step.outputs.blobs_updated }}" == "yes" ]]; then
+#        
+#        # echo "Bosh Blobs: initial state"
+#        # bosh blobs
+#
+#        ## Determine next release version number
+#
+#        # RELEASE_VERSION=$(cat release-version/version)
+#        # git config --global --add safe.directory "$(pwd)"
+#        # git config user.name  "github-actions[bot]"
+#        # git config user.email "41898282+github-actions[bot]@users.noreply.github.com "
+#
+#        # bosh create-release --final --version="${RELEASE_VERSION}" --tarball="./cf-cli-v${RELEASE_VERSION}.tgz"
+#
+#        # git add --all
+#        # git status
+#        # git commit -m "create final release ${RELEASE_VERSION}"
+#
+#        ls -lah ./candidate-release-output/cf-cli-dev-release.tgz
+#
+#    # - name: Setup tmate session
+#    #   if: ${{ always() && runner.debug }}
+#    #   uses: mxschmitt/action-tmate@v3
+#    #   timeout-minutes: 15
+#
