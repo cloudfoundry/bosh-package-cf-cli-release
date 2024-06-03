@@ -21,35 +21,20 @@ jobs:
     - name: Checkout cli bosh release repo
       uses: actions/checkout@v4
 
-    - name: Acquire latest CF CLI V7
+    - name: Acquire latest CF CLI binaries
       run: |
-        mkdir -p v7-cli-binary
-        cd v7-cli-binary
-        wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow"
-        tar -xvzf cf7-cli_*_linux_x86-64.tgz --wildcards 'cf*'
-        ./cf version
+        ./ci/scripts/download-cf-cli-binary.sh --major-version 7 --output-dir ./build/cf-cli-binaries
+        ./ci/scripts/download-cf-cli-binary.sh --major-version 8 --output-dir ./build/cf-cli-binaries
 
-    - name: Acquire latest CF CLI V8
+    - name: Compare latest CF CLI binaries against latest published BOSH release
+      id: compare-manifest-against-binaries
       run: |
-        mkdir -p v8-cli-binary
-        cd v8-cli-binary
-        wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
-        tar -xvzf cf8-cli_*_linux_x86-64.tgz --wildcards 'cf*'
-        ./cf version
+        ./ci/scripts/compare-against-published-bosh-release.sh --downloaded-binaries-dir ./build/cf-cli-binaries >> $GITHUB_OUTPUT
 
     - name: Create bosh release candidate
-      id: create-bosh-release-candidate-step
-      env:
-        TRACE: ${{ runner.debug }}
-        # S3 final release config to upload
-        # ACCESS_KEY_ID:
-        # SECRET_KEY:
+      if: steps.compare-manifest-against-binaries.outputs.blobs_updated == 'true'
       run: |
-        source ./ci/scripts/create-bosh-release-candidate.sh
-        create_bosh_release_candidate 7
-        create_bosh_release_candidate 8
-
-        bosh blobs
+        ./ci/scripts/create-bosh-release-candidate.sh --downloaded-binaries-dir ./build/cf-cli-binaries
 
     # - name: Push changes
     #   uses: ad-m/github-push-action@master
