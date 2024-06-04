@@ -55,9 +55,8 @@ jobs:
       uses: a-b/gha-shepherd@main
       with:
         debug:        ${{ runner.debug }}
-        api_token:    ${{ secrets.API_TOKEN }}
+        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
         api_endpoint: ${{ vars.API_ENDPOINT }}
-        # namespace:    tas-devex
         namespace:    official
         run: |
           echo "List all available pools"
@@ -65,36 +64,34 @@ jobs:
           exit 0
           echo "Wont reach to this point"
 
-    # - name: Claim environment with provided pool_name and pool_namespace
-    #   id:   claim-env
-    #   uses: ./
-    #   with:
-    #     debug:        ${{ runner.debug }}
-    #     api_token:    ${{ secrets.API_TOKEN }}
-    #     api_endpoint: ${{ vars.API_ENDPOINT }}
-    #     # pool_name:      cfd-29-test
-    #     # pool_namespace: tas-devex
-    #     pool_name:      cfd-29
-    #     pool_namespace: official
-    #     namespace:      tas-devex
-    #     duration:       1h
+    - name: Claim environment with provided pool_name and pool_namespace
+      id:   claim-env
+      uses: a-b/gha-shepherd@main
+      with:
+        debug:        ${{ runner.debug }}
+        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+        api_endpoint: ${{ vars.API_ENDPOINT }}
+        pool_name:      cfd-29
+        pool_namespace: official
+        namespace:      tas-devex
+        duration:       1h
 
-    # - name: Print env status
-    #   run: |
-    #     jq -r .status lease.json
+    - name: Print env status
+      run: |
+        jq -r .status lease.json
 
-    # - name: Unclaim environment with provided env_id and namespace
-    #   if:   always()
-    #   uses: ./
-    #   with:
-    #     debug:        ${{ runner.debug }}
-    #     api_token:    ${{ secrets.API_TOKEN }}
-    #     api_endpoint: ${{ vars.API_ENDPOINT }}
-    #     env_id:       ${{ steps.claim-env.outputs.env-id }}
-    #     namespace:    tas-devex
+    - name: Unclaim environment with provided env_id and namespace
+      if:   always()
+      uses: a-b/gha-shepherd@main
+      with:
+        debug:        ${{ runner.debug }}
+        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+        api_endpoint: ${{ vars.API_ENDPOINT }}
+        env_id:       ${{ steps.claim-env.outputs.env-id }}
+        namespace:    tas-devex
 
-    #     env_name=$(jq -r .name metadata.json)
-    #     cat metadata.json | jq -r '.name'
+        # env_name=$(jq -r .name metadata.json)
+        # cat metadata.json | jq -r '.name'
     #     echo "lease-id=$lease_id" >> "${GITHUB_OUTPUT}"
 
 
