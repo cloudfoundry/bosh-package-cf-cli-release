@@ -8,7 +8,7 @@ set -o errexit -o nounset -o pipefail
 . "$(dirname "${BASH_SOURCE[0]}")"/stdlib.sh
 
 create_bosh_release_candidate() {
-  # Parse and validate arguments
+  ## Parse and validate arguments
   while [ ${#} -gt 0 ] ; do
     case "${1}" in
       --downloaded-binaries-dir)
@@ -25,16 +25,24 @@ create_bosh_release_candidate() {
 
   [[ -z "${_downloaded_binaries_dir:-}" ]] && fail_with "Must provide --downloaded-binaries-dir"
 
+  # Start off assuming no updates
+  _blobs_updated=false
+
+  # Remember current blobs
+  print_stderr "\nBlobs in most recent Bosh release:\n$(bosh blobs)"
   _published_blobs=$(bosh blobs --json | jq --compact-output '.Tables[0].Rows[] | {path, digest}')
 
-  # Prune Bosh release
-  print_stderr "Removing blobs from Bosh release that do not match downloaded binaries"
+  ## STEP 1: Prune mismatched blobs from current Bosh release
+  print_stderr "\nRemoving blobs from Bosh release that do not match downloaded binaries."
+
   for _published_blob in ${_published_blobs}; do
     _published_blob_name=$(echo "${_published_blob}" | jq --raw-output '.path')
     _resolved_tarball=$(find "${_downloaded_binaries_dir}"/* -type f -name "${_published_blob_name}" | head -1)
 
     # Failed to find named tarball - Prune
     if [[ -z "${_resolved_tarball}" ]]; then
+      _blobs_updated=true
+
       print_stderr "Published blob ${_published_blob_name} does not have corresponding downloaded binary. Removing from new release."
       bosh remove-blob "${_published_blob_name}"
 
@@ -45,6 +53,8 @@ create_bosh_release_candidate() {
 
       # Digest mismatch - Prune
       if [[ "${_published_blob_digest}" != "${_downloaded_tarball_digest}" ]]; then
+        _blobs_updated=true
+
         print_stderr "Downloaded binary ${_published_blob_name} does not match blob in published Bosh release (published release specifies digest ${_published_blob_digest}, downloaded binary has digest ${_downloaded_tarball_digest}). Removing from new release."
       
         bosh remove-blob "${_published_blob}"
@@ -57,7 +67,11 @@ create_bosh_release_candidate() {
   # Update so that subsequent operations use newly-pruned blobs
   _updated_published_blobs=$(bosh blobs --json | jq --compact-output '.Tables[0].Rows[] | {path, digest}')
 
-  # Find tarball
+
+  ## STEP 2: Add new blobs to bosh release
+  print_stderr "\nAdding downloaded binaries to the Bosh release."
+
+  # Find tarballs
   tarball_regex="^.*/cf[0-9]?-cli_([0-9]+\.[0-9]+\.[0-9]+)_linux_x86-64\.tgz$" \
   _downloaded_tarballs=$(find "${_downloaded_binaries_dir}"/* \
     -type f \
@@ -70,8 +84,9 @@ create_bosh_release_candidate() {
     _published_blob=$(echo "${_updated_published_blobs}" | jq ". | select(.path == \"${_downloaded_tarball_basename}\")")
 
     if [[ -z "${_published_blob}" ]]; then
-      print_stderr "Downloaded binary ${_downloaded_tarball_basename} has no corresponding blob in published Bosh release. Adding to new release."
+      _blobs_updated=true
 
+      print_stderr "Downloaded binary ${_downloaded_tarball_basename} has no corresponding blob in published Bosh release. Adding to new release."
       bosh add-blob "${_downloaded_tarball}" "${_downloaded_tarball_basename}"
 
     else
@@ -79,6 +94,8 @@ create_bosh_release_candidate() {
       _downloaded_tarball_digest="sha256:$(sha256sum "${_downloaded_tarball}" | cut --delimiter ' ' --field 1)"
 
       if [[ "${_published_tarball_digest}" != "${_downloaded_tarball_digest}" ]]; then
+        _blobs_updated=true
+
         print_stderr "Downloaded binary ${_downloaded_tarball} does not match blob in published Bosh release (published release specifies digest ${_published_tarball_digest}, downloaded binary has digest ${_downloaded_tarball_digest}). Adding to new release."
 
         bosh add-blob "${_downloaded_tarball}" "${_downloaded_tarball_basename}"
@@ -89,6 +106,11 @@ create_bosh_release_candidate() {
   done
 
   # bosh create-release --timestamp-version --tarball=./candidate-release-output/cf-cli-dev-release.tgz
+
+  print_stderr "\nBlobs in pending Bosh release"
+  bosh blobs
+
+  echo "blobs_updated=${_blobs_updated}" >> "${GITHUB_OUTPUT}"
 }
 
 # Was the script sourced or executed?

@@ -26,13 +26,7 @@ jobs:
         ./ci/scripts/download-cf-cli-binary.sh --major-version 7 --output-dir ./build/cf-cli-binaries
         ./ci/scripts/download-cf-cli-binary.sh --major-version 8 --output-dir ./build/cf-cli-binaries
 
-    - name: Compare latest CF CLI binaries against latest published BOSH release
-      id: compare-manifest-against-binaries
-      run: |
-        ./ci/scripts/compare-against-published-bosh-release.sh --downloaded-binaries-dir ./build/cf-cli-binaries >> $GITHUB_OUTPUT
-
     - name: Create bosh release candidate
-      if: steps.compare-manifest-against-binaries.outputs.blobs_updated == 'true'
       run: |
         ./ci/scripts/create-bosh-release-candidate.sh --downloaded-binaries-dir ./build/cf-cli-binaries
 
