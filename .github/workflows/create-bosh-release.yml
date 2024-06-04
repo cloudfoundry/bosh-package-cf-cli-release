@@ -51,54 +51,40 @@ jobs:
 
         bosh blobs
 
-
     # - name: Push changes
     #   uses: ad-m/github-push-action@master
     #   with:
     #     github_token: ${{ secrets.GITHUB_TOKEN }}
     #     branch: ${{ github.ref }}
 
-    # - name: Run arbitrary command via configured shepherd
-    #   uses: a-b/gha-shepherd@main
-    #   with:
-    #     debug:        ${{ runner.debug }}
-    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-    #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
-    #     namespace:    official
-    #     run: |
-    #       echo "List all available pools"
-    #       shepherd list pool --namespace "${NAMESPACE:?}"
-    #       exit 0
-    #       echo "Wont reach to this point"
-
-    # - name: Claim environment with provided pool_name and pool_namespace
-    #   id:   claim-env
-    #   uses: a-b/gha-shepherd@main
-    #   with:
-    #     debug:        ${{ runner.debug }}
-    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-    #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
-    #     pool_name:      cfd-29
-    #     pool_namespace: official
-    #     namespace:      tas-devex
-    #     duration:       1h
-
-    - name: Get metadata.json
+    - name: Claim environment with provided pool_name and pool_namespace
+      id:   claim-env
       uses: a-b/gha-shepherd@main
       with:
         debug:        ${{ runner.debug }}
         api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
         api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
-        namespace:    tas-devex
-        run: |
-          # shepherd list pool --namespace "${NAMESPACE:?}"
-          lease_id=4ec3abfe-e4d8-414c-862e-d1b320d007cf
-          shepherd get lease "${lease_id:?}" \
-          --namespace tas-devex \
-          --json \
-          | jq -r \
-              --sort-keys \
-          > lease.json
+        pool_name:      cfd-29
+        pool_namespace: official
+        namespace:      tas-devex
+        duration:       1h
+
+    # - name: Get metadata.json
+    #   uses: a-b/gha-shepherd@main
+    #   with:
+    #     debug:        ${{ runner.debug }}
+    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+    #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
+    #     namespace:    tas-devex
+    #     run: |
+    #       # shepherd list pool --namespace "${NAMESPACE:?}"
+    #       lease_id=4ec3abfe-e4d8-414c-862e-d1b320d007cf
+    #       shepherd get lease "${lease_id:?}" \
+    #       --namespace tas-devex \
+    #       --json \
+    #       | jq -r \
+    #           --sort-keys \
+    #       > lease.json
 
     - name: Deploy and run tests
       run: |
@@ -148,15 +134,15 @@ jobs:
         bosh delete-deployment
         bosh clean-up --all
 
-    # - name: Unclaim environment with provided env_id and namespace
-    #   if:   always()
-    #   uses: a-b/gha-shepherd@main
-    #   with:
-    #     debug:        ${{ runner.debug }}
-    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-    #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
-    #     env_id:       ${{ steps.claim-env.outputs.env-id }}
-    #     namespace:    tas-devex
+    - name: Unclaim environment with provided env_id and namespace
+      if:   always()
+      uses: a-b/gha-shepherd@main
+      with:
+        debug:        ${{ runner.debug }}
+        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+        api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
+        env_id:       ${{ steps.claim-env.outputs.env-id }}
+        namespace:    tas-devex
 
 #    ## Finalize bosh release
 #    ##   Get final release from assets
