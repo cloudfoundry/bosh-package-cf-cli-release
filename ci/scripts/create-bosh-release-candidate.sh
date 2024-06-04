@@ -35,7 +35,7 @@ create_bosh_release_candidate() {
   echo "::endgroup::"
 
   ## STEP 1: Prune mismatched blobs from current Bosh release
-  echo "::group::Removing blobs from Bosh release that do not match downloaded binaries."
+  echo "Removing blobs from Bosh release that do not match downloaded binaries."
 
   for _published_blob in ${_published_blobs}; do
     _published_blob_name=$(echo "${_published_blob}" | jq --raw-output '.path')
@@ -66,14 +66,12 @@ create_bosh_release_candidate() {
     fi
   done
 
-  echo "::endgroup::"
-
   # Update so that subsequent operations use newly-pruned blobs
   _updated_published_blobs=$(bosh blobs --json | jq --compact-output '.Tables[0].Rows[] | {path, digest}')
 
 
   ## STEP 2: Add new blobs to bosh release
-  echo "::group::Adding downloaded binaries to the Bosh release."
+  echo "Adding downloaded binaries to the Bosh release."
 
   # Find tarballs
   tarball_regex="^.*/cf[0-9]?-cli_([0-9]+\.[0-9]+\.[0-9]+)_linux_x86-64\.tgz$" \
@@ -108,7 +106,6 @@ create_bosh_release_candidate() {
       fi
     fi
   done
-  echo "::endgroup::"
 
   # bosh create-release --timestamp-version --tarball=./candidate-release-output/cf-cli-dev-release.tgz
 
