@@ -69,25 +69,31 @@ jobs:
         namespace:      tas-devex
         duration:       1h
 
-    # - name: Get metadata.json
-    #   uses: a-b/gha-shepherd@main
-    #   with:
-    #     debug:        ${{ runner.debug }}
-    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-    #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
-    #     namespace:    tas-devex
-    #     run: |
-    #       # shepherd list pool --namespace "${NAMESPACE:?}"
-    #       lease_id=4ec3abfe-e4d8-414c-862e-d1b320d007cf
-    #       shepherd get lease "${lease_id:?}" \
-    #       --namespace tas-devex \
-    #       --json \
-    #       | jq -r \
-    #           --sort-keys \
-    #       > lease.json
+    - name: Get metadata.json
+      uses: a-b/gha-shepherd@main
+      with:
+        debug:        ${{ runner.debug }}
+        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+        api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
+        namespace:    tas-devex
+        run: |
+          # shepherd list pool --namespace "${NAMESPACE:?}"
+
+          sleep 360
+          
+          lease_id="${{ steps.claim-env.outputs.env-id }}"
+          shepherd get lease "${lease_id:?}" \
+          --namespace tas-devex \
+          --json \
+          | jq -r \
+              --sort-keys \
+          > lease.json
+          cat lease.json | jq --sort-keys
 
     - name: Deploy and run tests
       run: |
+        set -x -o errexit -o nounset -o pipefail
+        set -o xtrace
 
         install_location=/usr/local/bin
 
@@ -95,15 +101,20 @@ jobs:
         #   jq -r ".assets[] | select(.name | test(\"^bbl-.*_linux_amd64$\")) | .browser_download_url")
         # curl ${latest_bbl_url:?} --silent --output $install_location/bosh --location
         # chmod +x $install_location/bbl
-        bbl --version
+        # bbl --version
 
         # latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest | \
         #   jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
         # curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
         # chmod +x $install_location/bosh
-        bosh --version
+        # bosh --version
+
+        # apt-get install ca-certificates
 
         jq -r .output lease.json > metadata.json
+
+        cat metadata.json | jq --sort-keys
+
         env_name=$(jq -r .name metadata.json)
         jq -r .bosh.jumpbox_private_key metadata.json > /tmp/${env_name}.priv
         eval "$(bbl print-env --metadata-file metadata.json)"
