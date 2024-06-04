@@ -6,7 +6,6 @@ on:
 defaults:
   run:
     shell: bash
-    # working-directory: ${{ }}
 
 env:
   BOSH_DEPLOYMENT:      cf-cli-test
@@ -22,21 +21,21 @@ jobs:
     - name: Checkout cli bosh release repo
       uses: actions/checkout@v4
 
-    # - name: Acquire latest CF CLI V7
-    #   run: |
-    #     mkdir -p v7-cli-binary
-    #     cd v7-cli-binary
-    #     wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow"
-    #     tar -xvzf cf7-cli_*_linux_x86-64.tgz --wildcards 'cf*'
-    #     ./cf version
+    - name: Acquire latest CF CLI V7
+      run: |
+        mkdir -p v7-cli-binary
+        cd v7-cli-binary
+        wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow"
+        tar -xvzf cf7-cli_*_linux_x86-64.tgz --wildcards 'cf*'
+        ./cf version
 
-    # - name: Acquire latest CF CLI V8
-    #   run: |
-    #     mkdir -p v8-cli-binary
-    #     cd v8-cli-binary
-    #     wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
-    #     tar -xvzf cf8-cli_*_linux_x86-64.tgz --wildcards 'cf*'
-    #     ./cf version
+    - name: Acquire latest CF CLI V8
+      run: |
+        mkdir -p v8-cli-binary
+        cd v8-cli-binary
+        wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=bosh-package-cf-cli-release-workflow"
+        tar -xvzf cf8-cli_*_linux_x86-64.tgz --wildcards 'cf*'
+        ./cf version
 
     - name: Create bosh release candidate
       id: create-bosh-release-candidate-step
@@ -50,18 +49,8 @@ jobs:
         create_bosh_release_candidate 7
         create_bosh_release_candidate 8
 
-        # mkdir -p candidate-release-output
-
-        ls -lah 
-
-        # bosh remove-blob cf7-cli_7.99.99_linux_x86-64.tgz
         bosh blobs
 
-        mv .dev_builds /tmp
-        bosh create-release --timestamp-version \
-          --force #TODO: remove me
-
-    ## Store tgz with bosh release candidate
 
     # - name: Push changes
     #   uses: ad-m/github-push-action@master
@@ -82,81 +71,44 @@ jobs:
     #       exit 0
     #       echo "Wont reach to this point"
 
-    # - name: Claim environment with provided pool_name and pool_namespace
-    #   id:   claim-env
-    #   uses: a-b/gha-shepherd@main
-    #   with:
-    #     debug:        ${{ runner.debug }}
-    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-    #     api_endpoint: ${{ vars.API_ENDPOINT }}
-    #     pool_name:      cfd-29
-    #     pool_namespace: official
-    #     namespace:      tas-devex
-    #     duration:       1h
-
-    # - name: Checkout cf-deployment
-    #   uses: actions/checkout@v4
-    #   with:
-    #     repository: cloudfoundry/cf-deployment
-    #     path: cf-deployment
-
-    # - name: Checkout cli-ci
-    #   uses: actions/checkout@v4
-    #   with:
-    #     repository: cloudfoundry/cli-ci
-    #     path: cli-ci
+    - name: Claim environment with provided pool_name and pool_namespace
+      id:   claim-env
+      uses: a-b/gha-shepherd@main
+      with:
+        debug:        ${{ runner.debug }}
+        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+        api_endpoint: ${{ vars.API_ENDPOINT }}
+        pool_name:      cfd-29
+        pool_namespace: official
+        namespace:      tas-devex
+        duration:       1h
 
     - name: Deploy and run tests
       run: |
 
-        jq -r .output lease.json > metadata.json
-
-
         install_location=/usr/local/bin
-        bbl_artifact=bbl-v8.4.110_linux_x86-64
-        bosh_cli_artifact=bosh-cli-7.0.1-linux-amd64
-        credhub_artifact=credhub-linux-2.9.4.tgz
-        
-        curl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.110/${bbl_artifact} --silent --location --output  $install_location/bbl
+
+        latest_bbl_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-bootloader/releases/latest | \
+          jq -r ".assets[] | select(.name | test(\"^bbl-.*_linux_amd64$\")) | .browser_download_url")
+        curl ${latest_bbl_url:?} --silent --output $install_location/bosh --location
         chmod +x $install_location/bbl
         bbl --version
-        
-        curl https://s3.amazonaws.com/bosh-cli-artifacts/$bosh_cli_artifact --silent --output $install_location/bosh --location
+
+        latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest | \
+          jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
+        curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
         chmod +x $install_location/bosh
         bosh --version
-        
-        # curl https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.4/$credhub_artifact --silent --output /tmp/$credhub_artifact --location
-        # tar xzvf /tmp/$credhub_artifact
-        # mv credhub $install_location/credhub
-        # chmod +x $install_location/credhub
-        # credhub --version
 
-        env_name=$(jq -r .name metadata.json)
-        jq -r .bosh.jumpbox_private_key metadata.json > /tmp/${env_name}.priv
+        jq -r .output lease.json > metadata.json
         eval "$(bbl print-env --metadata-file metadata.json)"
-
-        # deploy
-        # bosh -d cf manifest > /tmp/manifest.yml
-        # bosh interpolate /tmp/manifest.yml \
-        #   -o cf-deployment/operations/add-persistent-isolation-segment-diego-cell.yml \
-        #   -o cli-ci/ci/infrastructure/operations/add-oidc-provider.yml \
-        #   -o cli-ci/ci/infrastructure/operations/add-uaa-client-credentials.yml \
-        #   -o cli-ci/ci/infrastructure/operations/diego-cell-instances.yml \
-        #   -v client-secret="CF_INT_CLIENT_SECRET" \
-        #   > ./director.yml
-
-        # bosh -d cf deploy director.yml -n
-        # echo "Deployed CAPI version:"
-        # bosh -d cf releases | grep capi
-
-        ls -lah $install_location
-
-        bosh deployments
 
         bosh delete-deployment --force
 
+        ## Store tgz with bosh release candidate
+        # mv .dev_builds /tmp
         bosh create-release --timestamp-version --tarball=/tmp/cf-cli-dev-release.tgz \
-          --force
+          --force #TODO: remove me export tgz for assets
 
         bosh deploy ./manifests/test.yml
         bosh run-errand cf-cli-7-linux-test
@@ -164,57 +116,15 @@ jobs:
         bosh delete-deployment
         bosh clean-up --all
 
-
-        exit 0
-
-
-
-
-
-
-    # - name: Unclaim environment with provided env_id and namespace
-    #   if:   always()
-    #   uses: a-b/gha-shepherd@main
-    #   with:
-    #     debug:        ${{ runner.debug }}
-    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-    #     api_endpoint: ${{ vars.API_ENDPOINT }}
-    #     env_id:       ${{ steps.claim-env.outputs.env-id }}
-    #     namespace:    tas-devex
-
-        # env_name=$(jq -r .name metadata.json)
-        # cat metadata.json | jq -r '.name'
-    #     echo "lease-id=$lease_id" >> "${GITHUB_OUTPUT}"
-
-
-
-
-
-
-
-
-
-
-    ## Deploy cli bosh release candidate
-    # - name: Deploy bosh release candidate
-    #   run:
-    # - get bosh cli
-    #     install_location=/usr/local/bin
-    #     latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest \
-    #       | jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
-
-    #     curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
-    #     chmod +x $install_location/bosh
-
-
-
-
-
-
-
-
-
-
+    - name: Unclaim environment with provided env_id and namespace
+      if:   always()
+      uses: a-b/gha-shepherd@main
+      with:
+        debug:        ${{ runner.debug }}
+        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+        api_endpoint: ${{ vars.API_ENDPOINT }}
+        env_id:       ${{ steps.claim-env.outputs.env-id }}
+        namespace:    tas-devex
 
 #    ## Finalize bosh release
 #    ##   Get final release from assets
@@ -249,9 +159,8 @@ jobs:
 #        # git commit -m "create final release ${RELEASE_VERSION}"
 #
 #        ls -lah ./candidate-release-output/cf-cli-dev-release.tgz
-#
-#    # - name: Setup tmate session
-#    #   if: ${{ always() && runner.debug }}
-#    #   uses: mxschmitt/action-tmate@v3
-#    #   timeout-minutes: 15
-#
+
+    - name: Setup tmate session
+      if: ${{ always() && runner.debug }}
+      uses: mxschmitt/action-tmate@v3
+      timeout-minutes: 20
