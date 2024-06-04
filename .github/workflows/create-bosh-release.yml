@@ -8,6 +8,10 @@ defaults:
     shell: bash
     # working-directory: ${{ }}
 
+env:
+  BOSH_DEPLOYMENT:      cf-cli-test
+  BOSH_NON_INTERACTIVE: true
+
 jobs:
   bosh_release_create_candidate:
     runs-on: ubuntu-latest
@@ -18,6 +22,14 @@ jobs:
     - name: Checkout cli bosh release repo
       uses: actions/checkout@v4
 
+    # - name: Acquire latest CF CLI V7
+    #   run: |
+    #     mkdir -p v7-cli-binary
+    #     cd v7-cli-binary
+    #     wget --trust-server-names "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v7&source=bosh-package-cf-cli-release-workflow"
+    #     tar -xvzf cf7-cli_*_linux_x86-64.tgz --wildcards 'cf*'
+    #     ./cf version
+
     # - name: Acquire latest CF CLI V8
     #   run: |
     #     mkdir -p v8-cli-binary
@@ -26,19 +38,28 @@ jobs:
     #     tar -xvzf cf8-cli_*_linux_x86-64.tgz --wildcards 'cf*'
     #     ./cf version
 
-    # - name: Create bosh release candidate
-    #   id: create-bosh-release-candidate-step
-    #   env:
-    #     TRACE: ${{ runner.debug }}
-    #     # S3 final release config to upload
-    #     # ACCESS_KEY_ID:
-    #     # SECRET_KEY:
-    #   run: |
-    #     source ./ci/scripts/create-bosh-release-candidate.sh
-    #     create_bosh_release_candidate 8
+    - name: Create bosh release candidate
+      id: create-bosh-release-candidate-step
+      env:
+        TRACE: ${{ runner.debug }}
+        # S3 final release config to upload
+        # ACCESS_KEY_ID:
+        # SECRET_KEY:
+      run: |
+        source ./ci/scripts/create-bosh-release-candidate.sh
+        create_bosh_release_candidate 7
+        create_bosh_release_candidate 8
 
-    #     mkdir -p candidate-release-output
-    #     bosh create-release --timestamp-version --tarball=./candidate-release-output/cf-cli-dev-release.tgz
+        # mkdir -p candidate-release-output
+
+        ls -lah 
+
+        # bosh remove-blob cf7-cli_7.99.99_linux_x86-64.tgz
+        bosh blobs
+
+        mv .dev_builds /tmp
+        bosh create-release --timestamp-version \
+          --force #TODO: remove me
 
     ## Store tgz with bosh release candidate
 
@@ -48,47 +69,118 @@ jobs:
     #     github_token: ${{ secrets.GITHUB_TOKEN }}
     #     branch: ${{ github.ref }}
 
-    # - name: Checkout cli bosh release repo
+    # - name: Run arbitrary command via configured shepherd
+    #   uses: a-b/gha-shepherd@main
+    #   with:
+    #     debug:        ${{ runner.debug }}
+    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+    #     api_endpoint: ${{ vars.API_ENDPOINT }}
+    #     namespace:    official
+    #     run: |
+    #       echo "List all available pools"
+    #       shepherd list pool --namespace "${NAMESPACE:?}"
+    #       exit 0
+    #       echo "Wont reach to this point"
+
+    # - name: Claim environment with provided pool_name and pool_namespace
+    #   id:   claim-env
+    #   uses: a-b/gha-shepherd@main
+    #   with:
+    #     debug:        ${{ runner.debug }}
+    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+    #     api_endpoint: ${{ vars.API_ENDPOINT }}
+    #     pool_name:      cfd-29
+    #     pool_namespace: official
+    #     namespace:      tas-devex
+    #     duration:       1h
+
+    # - name: Checkout cf-deployment
     #   uses: actions/checkout@v4
+    #   with:
+    #     repository: cloudfoundry/cf-deployment
+    #     path: cf-deployment
 
-    - name: Run arbitrary command via configured shepherd
-      uses: a-b/gha-shepherd@main
-      with:
-        debug:        ${{ runner.debug }}
-        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-        api_endpoint: ${{ vars.API_ENDPOINT }}
-        namespace:    official
-        run: |
-          echo "List all available pools"
-          shepherd list pool --namespace "${NAMESPACE:?}"
-          exit 0
-          echo "Wont reach to this point"
+    # - name: Checkout cli-ci
+    #   uses: actions/checkout@v4
+    #   with:
+    #     repository: cloudfoundry/cli-ci
+    #     path: cli-ci
 
-    - name: Claim environment with provided pool_name and pool_namespace
-      id:   claim-env
-      uses: a-b/gha-shepherd@main
-      with:
-        debug:        ${{ runner.debug }}
-        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-        api_endpoint: ${{ vars.API_ENDPOINT }}
-        pool_name:      cfd-29
-        pool_namespace: official
-        namespace:      tas-devex
-        duration:       1h
-
-    - name: Print env status
+    - name: Deploy and run tests
       run: |
-        jq -r .status lease.json
 
-    - name: Unclaim environment with provided env_id and namespace
-      if:   always()
-      uses: a-b/gha-shepherd@main
-      with:
-        debug:        ${{ runner.debug }}
-        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-        api_endpoint: ${{ vars.API_ENDPOINT }}
-        env_id:       ${{ steps.claim-env.outputs.env-id }}
-        namespace:    tas-devex
+        jq -r .output lease.json > metadata.json
+
+
+        install_location=/usr/local/bin
+        bbl_artifact=bbl-v8.4.110_linux_x86-64
+        bosh_cli_artifact=bosh-cli-7.0.1-linux-amd64
+        credhub_artifact=credhub-linux-2.9.4.tgz
+        
+        curl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.110/${bbl_artifact} --silent --location --output  $install_location/bbl
+        chmod +x $install_location/bbl
+        bbl --version
+        
+        curl https://s3.amazonaws.com/bosh-cli-artifacts/$bosh_cli_artifact --silent --output $install_location/bosh --location
+        chmod +x $install_location/bosh
+        bosh --version
+        
+        # curl https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.4/$credhub_artifact --silent --output /tmp/$credhub_artifact --location
+        # tar xzvf /tmp/$credhub_artifact
+        # mv credhub $install_location/credhub
+        # chmod +x $install_location/credhub
+        # credhub --version
+
+        env_name=$(jq -r .name metadata.json)
+        jq -r .bosh.jumpbox_private_key metadata.json > /tmp/${env_name}.priv
+        eval "$(bbl print-env --metadata-file metadata.json)"
+
+        # deploy
+        # bosh -d cf manifest > /tmp/manifest.yml
+        # bosh interpolate /tmp/manifest.yml \
+        #   -o cf-deployment/operations/add-persistent-isolation-segment-diego-cell.yml \
+        #   -o cli-ci/ci/infrastructure/operations/add-oidc-provider.yml \
+        #   -o cli-ci/ci/infrastructure/operations/add-uaa-client-credentials.yml \
+        #   -o cli-ci/ci/infrastructure/operations/diego-cell-instances.yml \
+        #   -v client-secret="CF_INT_CLIENT_SECRET" \
+        #   > ./director.yml
+
+        # bosh -d cf deploy director.yml -n
+        # echo "Deployed CAPI version:"
+        # bosh -d cf releases | grep capi
+
+        ls -lah $install_location
+
+        bosh deployments
+
+        bosh delete-deployment --force
+
+        bosh create-release --timestamp-version --tarball=/tmp/cf-cli-dev-release.tgz \
+          --force
+
+        bosh deploy ./manifests/test.yml
+        bosh run-errand cf-cli-7-linux-test
+        bosh run-errand cf-cli-8-linux-test
+        bosh delete-deployment
+        bosh clean-up --all
+
+
+        exit 0
+
+
+
+
+
+
+    # - name: Unclaim environment with provided env_id and namespace
+    #   if:   always()
+    #   uses: a-b/gha-shepherd@main
+    #   with:
+    #     debug:        ${{ runner.debug }}
+    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+    #     api_endpoint: ${{ vars.API_ENDPOINT }}
+    #     env_id:       ${{ steps.claim-env.outputs.env-id }}
+    #     namespace:    tas-devex
 
         # env_name=$(jq -r .name metadata.json)
         # cat metadata.json | jq -r '.name'
