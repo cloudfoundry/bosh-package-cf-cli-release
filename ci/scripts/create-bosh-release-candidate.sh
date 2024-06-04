@@ -29,11 +29,13 @@ create_bosh_release_candidate() {
   _blobs_updated=false
 
   # Remember current blobs
-  print_stderr "\nBlobs in most recent Bosh release:\n$(bosh blobs)"
+  echo -e "::group::Blobs in most recent Bosh release:"
+  bosh blobs
   _published_blobs=$(bosh blobs --json | jq --compact-output '.Tables[0].Rows[] | {path, digest}')
+  echo "::endgroup::"
 
   ## STEP 1: Prune mismatched blobs from current Bosh release
-  print_stderr "\nRemoving blobs from Bosh release that do not match downloaded binaries."
+  echo "::group::Removing blobs from Bosh release that do not match downloaded binaries."
 
   for _published_blob in ${_published_blobs}; do
     _published_blob_name=$(echo "${_published_blob}" | jq --raw-output '.path')
@@ -63,6 +65,8 @@ create_bosh_release_candidate() {
       fi
     fi
   done
+
+  echo "::endgroup::"
 
   # Update so that subsequent operations use newly-pruned blobs
   _updated_published_blobs=$(bosh blobs --json | jq --compact-output '.Tables[0].Rows[] | {path, digest}')
