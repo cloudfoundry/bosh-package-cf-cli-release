@@ -5,7 +5,7 @@ set -o errexit -o nounset -o pipefail
 # TODO: How do we configure shellcheck to find the right file?
 # See https://www.shellcheck.net/wiki/SC1091
 # shellcheck source=/dev/null
-. "$(dirname "${BASH_SOURCE[0]}")"/stdlib.sh
+source "$(dirname "${BASH_SOURCE[0]}")"/stdlib.sh
 
 # Used to find downloaded tarballs and extract semver
 tarball_regex_sed="^.*cf[[:digit:]]\?-cli_\([[:digit:]]\+\).\([[:digit:]\+]\).\([[:digit:]]\+\)_linux_x86-64.tgz$"
@@ -42,6 +42,21 @@ remove_and_commit_blob() {
 
   echo "::group::Removing blob for v${_major_version}"
   bosh remove-blob "${_published_blob_name}"
+  #TODO: bosh blobs upload
+#  cat << EOF > config/private.yml
+#       blobstore:
+#         options:
+#           access_key_id: "$ACCESS_KEY_ID"
+#           secret_access_key: "$SECRET_KEY"
+#           assume_role_arn: "$AWS_ROLE_ARN"
+#     EOF
+
+#         bosh remove-blob $OLD_V8_BLOB_PATH
+
+#         bosh add-blob ../v8-cli-binary/cf8-cli_${LATEST_V8_CLI_VERSION}_linux_x86-64.tgz cf8-cli_${LATEST_V8_CLI_VERSION}_linux_x86-64.tgz
+#         bosh upload-blobs
+
+
   diff_and_commit_with_message "Removing CF CLI v${_major_version}"
   echo "::endgroup::"
 }
@@ -90,13 +105,18 @@ create_bosh_release_candidate() {
     esac
   done
 
+
+  [[ -z "${_downloaded_binaries_dir:-}" ]] && fail_with "Must provide --downloaded-binaries-dir"
+  [[ -z "${_git_email:-}" ]] && fail_with "Must provide --git-email"
+  [[ -z "${_git_username:-}" ]] && fail_with "Must provide --git-username"
+
   # Start off assuming no updates
   _blobs_updated=false
 
   # Configure git
   git config --global --add safe.directory "$(pwd)"
-  git config user.name  "${_git_username}"
-  git config user.email "${_git_email}"
+  git config --global user.name  "${_git_username}"
+  git config --global user.email "${_git_email}"
 
   # Remember current blobs
   echo "::group::Blobs in most recent Bosh release:"
@@ -107,9 +127,13 @@ create_bosh_release_candidate() {
   ## STEP 1: Prune or replace mismatched blobs from current Bosh release
   echo "Replacing blobs from Bosh release that do not match downloaded binaries."
 
+  #TODO: suggestion try using array of arrays https://devhints.io/bash#arrays
   for _published_blob in ${_published_blobs}; do
     _published_blob_name=$(echo "${_published_blob}" | jq --raw-output '.path')
-    _resolved_tarball=$(find "${_downloaded_binaries_dir}"/* -type f -name "${_published_blob_name}" | head -1)
+    _resolved_tarball=$(find "${_downloaded_binaries_dir}"/* -type f -name "${_published_blob_name}")
+    [[ $(echo "${_resolved_tarball}" | wc -l ) -gt 1 ]] && \
+      ls -laR "${_downloaded_binaries_dir}" && \
+      fail_with "Found multiple tarballs with name ${_published_blob_name} in ${_downloaded_binaries_dir}"
 
     # Failed to find named tarball - Prune
     if [[ -z "${_resolved_tarball}" ]]; then
@@ -154,6 +178,7 @@ create_bosh_release_candidate() {
     _published_blob=$(echo "${_updated_published_blobs}" | jq ". | select(.path == \"${_downloaded_tarball_basename}\")")
 
     if [[ -z "${_published_blob}" ]]; then
+      # Does downloaded tarball have a corresponding blob in the published Bosh release?
       _blobs_updated=true
 
       echo "Downloaded binary ${_downloaded_tarball_basename} has no corresponding blob in published Bosh release. Adding to new release."
@@ -174,45 +199,3 @@ create_bosh_release_candidate() {
 if [[ "$(realpath "${0}")" == "$(realpath "${BASH_SOURCE[0]}")" ]]; then
   create_bosh_release_candidate "$@"
 fi
-
-
-
-# git config --global --add safe.directory "$(pwd)"
-
-# create_bosh_release_candidate() {
-#     cli_version_major=$1
-
-#     latest_cli_version=$(ls -1 v${cli_version_major}-cli-binary | grep "^cf${cli_version_major}-cli" | cut -d_ -f2)
-#     old_blob_path=$(bosh blobs --column=path | grep "cf${cli_version_major}-cli" | tr -d '[:space:]')
-#     old_cli_version=$(echo "${old_blob_path:?}" | cut -d_ -f2)
-
-#     if [[ "${old_cli_version:?}" != "${latest_cli_version:?}" ]]; then
-#         git config user.name  "github-actions[bot]"
-#         git config user.email "41898282+github-actions[bot]@users.noreply.github.com "
-
-#         echo "Bosh Blobs: initial state"
-#         bosh blobs
-#         bosh remove-blob "${old_blob_path}"
-
-#         echo "Bosh Blobs: without old blob"
-#         bosh blobs
-#         bosh add-blob "v${cli_version_major}-cli-binary/cf${cli_version_major}-cli_${latest_cli_version}_linux_x86-64.tgz" "cf${cli_version_major}-cli_${latest_cli_version}_linux_x86-64.tgz"
-
-#         echo "Bosh Blobs: added new blob"
-#         bosh blobs
-#         #TODO: add bosh upload-blobs
-
-#         git status
-#         git add config/blobs.yml
-#         git status
-#         git commit -m "bump v${cli_version_major} cli from ${old_cli_version} to ${latest_cli_version}"
-
-#         echo "blobs_updated=yes" >> $GITHUB_OUTPUT
-#     else
-#         echo "Release has latest v${cli_version_major} CLI version, skipping bump."
-
-#         # echo "blobs_updated=no" >> $GITHUB_OUTPUT
-#     fi
-
-#     git log -3
-# }

@@ -5,7 +5,7 @@ set -o errexit -o nounset -o pipefail
 # TODO: How do we configure shellcheck to find the right file?
 # See https://www.shellcheck.net/wiki/SC1091
 # shellcheck source=/dev/null
-. "$(dirname "${BASH_SOURCE[0]}")"/stdlib.sh
+source "$(dirname "${BASH_SOURCE[0]}")"/stdlib.sh
 
 download_cf_cli_binary() {
   # Parse and validate arguments

@@ -1,7 +1,4 @@
-#!/bin/bash
-set -o errexit -o nounset -o pipefail
-[[ "${TRACE:-0}" == "1" ]] && set -o xtrace
-
+# shellcheck disable=SC2148
 fail_with() {
   echo -e "ERROR: ${1}"
   exit 1
