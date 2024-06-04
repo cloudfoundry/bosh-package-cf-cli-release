@@ -29,7 +29,7 @@ create_bosh_release_candidate() {
   _blobs_updated=false
 
   # Remember current blobs
-  echo -e "::group::Blobs in most recent Bosh release:"
+  echo "::group::Blobs in most recent Bosh release:"
   bosh blobs
   _published_blobs=$(bosh blobs --json | jq --compact-output '.Tables[0].Rows[] | {path, digest}')
   echo "::endgroup::"
@@ -45,7 +45,7 @@ create_bosh_release_candidate() {
     if [[ -z "${_resolved_tarball}" ]]; then
       _blobs_updated=true
 
-      print_stderr "Published blob ${_published_blob_name} does not have corresponding downloaded binary. Removing from new release."
+      echo "Published blob ${_published_blob_name} does not have corresponding downloaded binary. Removing from new release."
       bosh remove-blob "${_published_blob_name}"
 
     # Found named tarball - Compare digests
@@ -57,11 +57,11 @@ create_bosh_release_candidate() {
       if [[ "${_published_blob_digest}" != "${_downloaded_tarball_digest}" ]]; then
         _blobs_updated=true
 
-        print_stderr "Downloaded binary ${_published_blob_name} does not match blob in published Bosh release (published release specifies digest ${_published_blob_digest}, downloaded binary has digest ${_downloaded_tarball_digest}). Removing from new release."
+        echo "Downloaded binary ${_published_blob_name} does not match blob in published Bosh release (published release specifies digest ${_published_blob_digest}, downloaded binary has digest ${_downloaded_tarball_digest}). Removing from new release."
       
         bosh remove-blob "${_published_blob}"
       else
-        print_stderr "Downloaded binary ${_published_blob_name} has same digest as blob in published release: ${_published_blob_digest}. Disregarding."
+        echo "Downloaded binary ${_published_blob_name} has same digest as blob in published release: ${_published_blob_digest}. Disregarding."
       fi
     fi
   done
@@ -73,7 +73,7 @@ create_bosh_release_candidate() {
 
 
   ## STEP 2: Add new blobs to bosh release
-  print_stderr "\nAdding downloaded binaries to the Bosh release."
+  echo "::group::Adding downloaded binaries to the Bosh release."
 
   # Find tarballs
   tarball_regex="^.*/cf[0-9]?-cli_([0-9]+\.[0-9]+\.[0-9]+)_linux_x86-64\.tgz$" \
@@ -90,7 +90,7 @@ create_bosh_release_candidate() {
     if [[ -z "${_published_blob}" ]]; then
       _blobs_updated=true
 
-      print_stderr "Downloaded binary ${_downloaded_tarball_basename} has no corresponding blob in published Bosh release. Adding to new release."
+      echo "Downloaded binary ${_downloaded_tarball_basename} has no corresponding blob in published Bosh release. Adding to new release."
       bosh add-blob "${_downloaded_tarball}" "${_downloaded_tarball_basename}"
 
     else
@@ -100,19 +100,21 @@ create_bosh_release_candidate() {
       if [[ "${_published_tarball_digest}" != "${_downloaded_tarball_digest}" ]]; then
         _blobs_updated=true
 
-        print_stderr "Downloaded binary ${_downloaded_tarball} does not match blob in published Bosh release (published release specifies digest ${_published_tarball_digest}, downloaded binary has digest ${_downloaded_tarball_digest}). Adding to new release."
+        echo "Downloaded binary ${_downloaded_tarball} does not match blob in published Bosh release (published release specifies digest ${_published_tarball_digest}, downloaded binary has digest ${_downloaded_tarball_digest}). Adding to new release."
 
         bosh add-blob "${_downloaded_tarball}" "${_downloaded_tarball_basename}"
       else
-        print_stderr "Downloaded binary ${_downloaded_tarball_basename} has same digest as blob in published release: ${_published_tarball_digest}. Disregarding."
+        echo "Downloaded binary ${_downloaded_tarball_basename} has same digest as blob in published release: ${_published_tarball_digest}. Disregarding."
       fi
     fi
   done
+  echo "::endgroup::"
 
   # bosh create-release --timestamp-version --tarball=./candidate-release-output/cf-cli-dev-release.tgz
 
-  print_stderr "\nBlobs in pending Bosh release"
+  echo "::group::Blobs in pending Bosh release"
   bosh blobs
+  echo "::endgroup::"
 
   echo "blobs_updated=${_blobs_updated}" >> "${GITHUB_OUTPUT}"
 }
