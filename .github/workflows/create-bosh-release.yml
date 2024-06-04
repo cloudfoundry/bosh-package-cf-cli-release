@@ -129,6 +129,16 @@ jobs:
         bosh deployments
 
         ls -lah . v?-cli-binary
+
+        bosh blobs
+        bosh remove-blob cf7-cli_7.7.10_linux_x86-64.tgz
+        bosh add-blob v7-cli-binary/cf7-cli_7.7.10_linux_x86-64.tgz cf7-cli_7.7.10_linux_x86-64.tgz
+        bosh blobs
+        bosh remove-blob cf8-cli_8.7.10_linux_x86-64.tgz
+        bosh add-blob v8-cli-binary/cf8-cli_8.7.10_linux_x86-64.tgz  cf8-cli_8.7.10_linux_x86-64.tgz
+        bosh blobs
+
+
         bosh create-release --timestamp-version --tarball=/tmp/cf-cli-dev-release.tgz \
           --force #TODO: remove me export tgz for assets
 
