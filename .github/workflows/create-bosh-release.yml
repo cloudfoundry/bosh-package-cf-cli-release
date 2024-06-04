@@ -27,6 +27,8 @@ jobs:
         ./ci/scripts/download-cf-cli-binary.sh --major-version 8 --output-dir ./build/cf-cli-binaries
 
     - name: Create bosh release candidate
+      env:
+        TRACE: 1
       run: |
         ./ci/scripts/create-bosh-release-candidate.sh \
           --downloaded-binaries-dir ./build/cf-cli-binaries \

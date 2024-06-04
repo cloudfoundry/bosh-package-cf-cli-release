@@ -95,6 +95,7 @@ create_bosh_release_candidate() {
 
   pwd
   ls -laR .
+  git config --global --add safe.directory "$(pwd)"
   git status
 
   # Set git identity
