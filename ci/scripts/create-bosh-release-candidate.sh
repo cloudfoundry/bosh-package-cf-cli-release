@@ -93,12 +93,8 @@ create_bosh_release_candidate() {
   # Start off assuming no updates
   _blobs_updated=false
 
-  pwd
-  ls -laR .
+  # Configure git
   git config --global --add safe.directory "$(pwd)"
-  git status
-
-  # Set git identity
   git config user.name  "${_git_username}"
   git config user.email "${_git_email}"
 
