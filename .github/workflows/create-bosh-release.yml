@@ -63,7 +63,7 @@ jobs:
     #   with:
     #     debug:        ${{ runner.debug }}
     #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-    #     api_endpoint: ${{ vars.API_ENDPOINT }}
+    #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
     #     namespace:    official
     #     run: |
     #       echo "List all available pools"
@@ -71,42 +71,64 @@ jobs:
     #       exit 0
     #       echo "Wont reach to this point"
 
-    - name: Claim environment with provided pool_name and pool_namespace
-      id:   claim-env
+    # - name: Claim environment with provided pool_name and pool_namespace
+    #   id:   claim-env
+    #   uses: a-b/gha-shepherd@main
+    #   with:
+    #     debug:        ${{ runner.debug }}
+    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+    #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
+    #     pool_name:      cfd-29
+    #     pool_namespace: official
+    #     namespace:      tas-devex
+    #     duration:       1h
+
+    - name: Get metadata.json
       uses: a-b/gha-shepherd@main
       with:
         debug:        ${{ runner.debug }}
         api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-        api_endpoint: ${{ vars.API_ENDPOINT }}
-        pool_name:      cfd-29
-        pool_namespace: official
-        namespace:      tas-devex
-        duration:       1h
+        api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
+        namespace:    tas-devex
+        run: |
+          # shepherd list pool --namespace "${NAMESPACE:?}"
+          lease_id=4ec3abfe-e4d8-414c-862e-d1b320d007cf
+          shepherd get lease "${lease_id:?}" \
+          --namespace tas-devex \
+          --json \
+          | jq -r \
+              --sort-keys \
+          > lease.json
 
     - name: Deploy and run tests
       run: |
 
         install_location=/usr/local/bin
 
-        latest_bbl_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-bootloader/releases/latest | \
-          jq -r ".assets[] | select(.name | test(\"^bbl-.*_linux_amd64$\")) | .browser_download_url")
-        curl ${latest_bbl_url:?} --silent --output $install_location/bosh --location
-        chmod +x $install_location/bbl
+        # latest_bbl_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-bootloader/releases/latest | \
+        #   jq -r ".assets[] | select(.name | test(\"^bbl-.*_linux_amd64$\")) | .browser_download_url")
+        # curl ${latest_bbl_url:?} --silent --output $install_location/bosh --location
+        # chmod +x $install_location/bbl
         bbl --version
 
-        latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest | \
-          jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
-        curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
-        chmod +x $install_location/bosh
+        # latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest | \
+        #   jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
+        # curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
+        # chmod +x $install_location/bosh
         bosh --version
 
         jq -r .output lease.json > metadata.json
+        env_name=$(jq -r .name metadata.json)
+        jq -r .bosh.jumpbox_private_key metadata.json > /tmp/${env_name}.priv
         eval "$(bbl print-env --metadata-file metadata.json)"
 
         bosh delete-deployment --force
 
         ## Store tgz with bosh release candidate
         # mv .dev_builds /tmp
+        bosh deployments
+
+        ls -lah . v?-cli-binary
         bosh create-release --timestamp-version --tarball=/tmp/cf-cli-dev-release.tgz \
           --force #TODO: remove me export tgz for assets
 
@@ -116,15 +138,15 @@ jobs:
         bosh delete-deployment
         bosh clean-up --all
 
-    - name: Unclaim environment with provided env_id and namespace
-      if:   always()
-      uses: a-b/gha-shepherd@main
-      with:
-        debug:        ${{ runner.debug }}
-        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-        api_endpoint: ${{ vars.API_ENDPOINT }}
-        env_id:       ${{ steps.claim-env.outputs.env-id }}
-        namespace:    tas-devex
+    # - name: Unclaim environment with provided env_id and namespace
+    #   if:   always()
+    #   uses: a-b/gha-shepherd@main
+    #   with:
+    #     debug:        ${{ runner.debug }}
+    #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+    #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
+    #     env_id:       ${{ steps.claim-env.outputs.env-id }}
+    #     namespace:    tas-devex
 
 #    ## Finalize bosh release
 #    ##   Get final release from assets

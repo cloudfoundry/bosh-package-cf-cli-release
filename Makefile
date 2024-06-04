@@ -21,12 +21,16 @@ lint:
 		--workflows .github/workflows/lint.yml
 
 run:
-	find . -name '.git' -prune -o -type f -print | entr -c \
+	# find . -name '.git' -prune -o -type f -print | entr -c \
 		act \
 			--actor "${GITHUB_USER}" \
 			--secret GITHUB_TOKEN="${GITHUB_TOKEN}" \
 			--workflows .github/workflows/create-bosh-release.yml \
-			--job bosh_release_create_candidate
+			--secret-file .secrets \
+			--var-file    .env \
+			--job bosh_release_create_candidate \
+			--rm \
+			--watch
 
 hijack-act:
 	./ci/scripts/hijack-act.sh
