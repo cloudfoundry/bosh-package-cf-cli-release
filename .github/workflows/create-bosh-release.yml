@@ -28,7 +28,10 @@ jobs:
 
     - name: Create bosh release candidate
       run: |
-        ./ci/scripts/create-bosh-release-candidate.sh --downloaded-binaries-dir ./build/cf-cli-binaries
+        ./ci/scripts/create-bosh-release-candidate.sh \
+          --downloaded-binaries-dir ./build/cf-cli-binaries \
+          --git-username "github-actions[bot]" \
+          --git-email "41898282+github-actions[bot]@users.noreply.github.com"
 
     # - name: Push changes
     #   uses: ad-m/github-push-action@master
