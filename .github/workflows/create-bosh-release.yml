@@ -52,7 +52,7 @@ jobs:
     #   uses: actions/checkout@v4
 
     - name: Run arbitrary command via configured shepherd
-      uses: a-b/gha-shepherd@main
+      uses: pivotal-cf/gha-shepherd@main
       with:
         debug:        ${{ runner.debug }}
         api_token:    ${{ secrets.API_TOKEN }}
