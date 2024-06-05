@@ -186,7 +186,11 @@ create_bosh_release_candidate() {
     fi
   done
 
-  # bosh create-release --timestamp-version --tarball=./candidate-release-output/cf-cli-dev-release.tgz
+  bosh create-release \
+    --timestamp-version \
+    --force \
+    --tarball=./cf-cli-dev-release.tgz
+    #TODO: ^^ remove force flag
 
   echo "::group::Blobs in pending Bosh release"
   bosh blobs
