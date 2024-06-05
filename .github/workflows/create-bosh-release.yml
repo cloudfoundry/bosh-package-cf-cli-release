@@ -70,8 +70,7 @@ jobs:
 
     - name: Deploy and run tests
       run: |
-        set -x -o errexit -o nounset -o pipefail
-        # set -o xtrace
+        set -o errexit -o nounset -o pipefail
 
         install_dependencies() {
 
@@ -125,8 +124,7 @@ jobs:
     
     - name: Verify test results
       run: |
-        set -x -o errexit -o nounset -o pipefail
-        # set -o xtrace
+        set -o errexit -o nounset -o pipefail
 
         for test_result in /tmp/cf-cli-*-test.out; do
           echo "Test result: $test_result"
