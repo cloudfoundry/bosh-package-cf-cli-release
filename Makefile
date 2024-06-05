@@ -21,6 +21,8 @@ lint:
 		--workflows .github/workflows/lint.yml
 
 run:
+	@echo "Running make with arguments after -- : $(MAKECMDGOALS)"
+
 	# find . -name '.git' -prune -o -type f -print | entr -c \
 		act \
 			--actor "${GITHUB_USER}" \
@@ -30,7 +32,8 @@ run:
 			--var-file    .env \
 			--job bosh_release_create_candidate \
 			--rm \
-			--watch
+			--artifact-server-path /tmp/artifacts \
+			$(MAKECMDGOALS)
 
 hijack-act:
 	./ci/scripts/hijack-act.sh
