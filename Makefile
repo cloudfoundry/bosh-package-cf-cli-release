@@ -37,3 +37,6 @@ run:
 
 hijack-act:
 	./ci/scripts/hijack-act.sh
+
+bosh:
+	./ci/scripts/bosh-connect.sh

@@ -45,7 +45,7 @@ jobs:
     #     github_token: ${{ secrets.GITHUB_TOKEN }}
     #     branch: ${{ github.ref }}
 
-    - name: Claim environment with provided pool_name and pool_namespace
+    - name: Claim test environment
       id:   claim-env
       uses: a-b/gha-shepherd@main
       with:
@@ -57,13 +57,14 @@ jobs:
         namespace:      tas-devex
         duration:       4h
 
-    - name: Store lease.json to artifacts
+    - name: Store lease data
       uses: actions/upload-artifact@v4
       with:
         name: lease-json
         path: lease.json
 
-    - name: Retrieve lease.json
+    # use previous lease data to reuse leased environment
+    - name: Retrieve lease data
       uses: actions/download-artifact@v4
       with:
         name: lease-json
