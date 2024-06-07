@@ -15,7 +15,7 @@ jobs:
   bosh_release_create_candidate:
     runs-on: ubuntu-latest
     container:
-      image: "ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:187042013-release-workflow-latest"
+      image: "ghcr.io/${{ github.repository }}-ci:${{ github.ref_name }}-latest"
 
     steps:
     - name: Checkout cli bosh release repo

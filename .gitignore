@@ -25,3 +25,4 @@ dev_releases
 **/*.tgz
 .env
 .secrets
+node_modules

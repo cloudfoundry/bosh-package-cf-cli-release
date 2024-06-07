@@ -8,6 +8,9 @@ ENV terraform_version 0.11.5
 USER root
 RUN usermod -a -G sudo root
 
+#TODO: does docker resolve this leading period or just pass it through to the shell
+ENV PATH="./node_modules/.bin:${PATH}"
+
 RUN \
   apt-get update && \
   apt-get -y install \
@@ -57,7 +60,8 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && ln -s /usr/local/bin/node /usr/local/bin/nodejs \
   # smoke tests
   && node --version \
-  && npm --version
+  && npm --version \
+  && npm install-clean
 
 # bosh-cli
 RUN \
