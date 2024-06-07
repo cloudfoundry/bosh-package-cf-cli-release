@@ -1,6 +1,6 @@
-ifndef GITHUB_USER
-	$(error GITHUB_USER is not set)
-endif
+# ifndef GITHUB_USER
+# 	$(error GITHUB_USER is not set)
+# endif
 
 create-bosh-release:
 	act \
