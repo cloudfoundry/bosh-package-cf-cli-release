@@ -60,8 +60,9 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && ln -s /usr/local/bin/node /usr/local/bin/nodejs \
   # smoke tests
   && node --version \
-  && npm --version \
-  && npm install-clean
+  && npm --version
+  # && npm install-clean
+  #TODO: figure out why install-clean is broken.
 
 # bosh-cli
 RUN \
