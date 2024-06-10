@@ -71,7 +71,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         push: true
-        context: ${{ env.CI_DOCKERFILE_DIR }}
+        context: ${{ env.CI_DOCKERFILE_DIR }}/..
         file: ${{ env.CI_DOCKERFILE_DIR }}/${{ env.CI_DOCKERFILE_PATH }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}

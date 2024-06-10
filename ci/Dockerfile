@@ -18,6 +18,10 @@ RUN \
     yamllint && \
   apt list --installed
 
+COPY package.json \
+     package-lock.json \
+     ./
+
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
     amd64) ARCH='x64';; \
@@ -60,9 +64,8 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && ln -s /usr/local/bin/node /usr/local/bin/nodejs \
   # smoke tests
   && node --version \
-  && npm --version
-  # && npm install-clean
-  #TODO: figure out why install-clean is broken.
+  && npm --version \
+  && npm install-clean
 
 # bosh-cli
 RUN \

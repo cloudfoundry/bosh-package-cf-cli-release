@@ -21,208 +21,210 @@ jobs:
     - name: Checkout cli bosh release repo
       uses: actions/checkout@v4
 
-    - name: Acquire latest CF CLI binaries
-      run: |
-        ./ci/scripts/download-cf-cli-binary.sh --major-version 7 --output-dir ./build/cf-cli-binaries
-        ./ci/scripts/download-cf-cli-binary.sh --major-version 8 --output-dir ./build/cf-cli-binaries
-
-    - name: Create bosh release candidate
-      run: |
-        ./ci/scripts/create-bosh-release-candidate.sh \
-          --downloaded-binaries-dir ./build/cf-cli-binaries \
-          --git-username "github-actions[bot]" \
-          --git-email "41898282+github-actions[bot]@users.noreply.github.com"
-
-    - name: Upload bosh release candidate
-      uses: actions/upload-artifact@v4
-      with:
-        name: bosh-release-candidate
-        path: ./cf-cli-dev-release.tgz
-
-    # - name: Push changes
-    #   uses: ad-m/github-push-action@master
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
-    #     branch: ${{ github.ref }}
-
-    - name: Create test environment
-      id:   create-env
-      if:   ${{ !vars.ENV_ID }}
-      uses: a-b/gha-shepherd@main
-      with:
-        api_endpoint  : ${{ vars.SHEPHERD_API_ENDPOINT }}
-        api_token     : ${{ secrets.SHEPHERD_API_TOKEN }}
-        command       : create
-        debug         : ${{ runner.debug }}
-        duration      : 1h
-        namespace     : tas-devex
-        pool_name     : cfd
-        pool_namespace: official
-
-    - name: Get running env metadata
-      uses: a-b/gha-shepherd@main
-      with:
-        api_endpoint : ${{ vars.SHEPHERD_API_ENDPOINT }}
-        api_token    : ${{ secrets.SHEPHERD_API_TOKEN }}
-        command      : get
-        debug        : ${{ runner.debug }}
-        env_file_path: ./lease.json
-        env_id       : ${{ vars.ENV_ID || steps.create-env.outputs.env-id }}
-        namespace    : tas-devex
-
-
-    # - name: Store lease data
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: lease-json
-    #     path: lease.json
-
-    # # use previous lease data to reuse leased environment
-    # - name: Retrieve lease data
-    #   uses: actions/download-artifact@v4
-    #   with:
-    #     name: foobar
-
-    - name: Deploy and run tests
-      run: |
-        set -o errexit -o nounset -o pipefail
-
-        install_dependencies() {
-
-          install_location=/usr/local/bin
-
-          latest_bbl_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-bootloader/releases/latest | \
-            jq -r ".assets[] | select(.name | test(\"^bbl-.*_linux_amd64$\")) | .browser_download_url")
-          curl ${latest_bbl_url:?} --silent --output $install_location/bosh --location
-          chmod +x $install_location/bbl
-          bbl --version
-
-          latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest | \
-            jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
-          curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
-          chmod +x $install_location/bosh
-          bosh --version
-
-        }
-
-        setup_bosh_environment() {
-
-          jq -r .output lease.json > metadata.json
-
-          env_name=$(jq -r .name metadata.json)
-          jq -r .bosh.jumpbox_private_key metadata.json > /tmp/${env_name}.priv
-          eval "$(bbl print-env --metadata-file metadata.json)"
-
-        }
-
-        # install_dependencies
-        setup_bosh_environment
-
-        bosh delete-deployment --force
-        bosh deployments
-        bosh deploy ./manifests/test.yml
-
-        bosh run-errand cf-cli-7-linux-test \
-          | tee /tmp/cf-cli-7-linux-test.out
-
-        bosh run-errand cf-cli-8-linux-test \
-          | tee /tmp/cf-cli-8-linux-test.out
-
-        bosh delete-deployment
-        bosh clean-up --all
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: /tmp/cf-cli-*-test.out
     
-  # verify_test_results:
-  #   runs-on: ubuntu-latest
-  #   # container:
-  #   #   image: "ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:187042013-release-workflow-latest"
 
-  #   steps:
+  #   - name: Acquire latest CF CLI binaries
+  #     run: |
+  #       ./ci/scripts/download-cf-cli-binary.sh --major-version 7 --output-dir ./build/cf-cli-binaries
+  #       ./ci/scripts/download-cf-cli-binary.sh --major-version 8 --output-dir ./build/cf-cli-binaries
 
-  #   - name: Checkout cli bosh release repo
-  #     uses: actions/checkout@v3
+  #   - name: Create bosh release candidate
+  #     run: |
+  #       ./ci/scripts/create-bosh-release-candidate.sh \
+  #         --downloaded-binaries-dir ./build/cf-cli-binaries \
+  #         --git-username "github-actions[bot]" \
+  #         --git-email "41898282+github-actions[bot]@users.noreply.github.com"
 
-  #   - name: Download test results
-  #     uses: actions/download-artifact@v3
+  #   - name: Upload bosh release candidate
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: bosh-release-candidate
+  #       path: ./cf-cli-dev-release.tgz
+
+  #   # - name: Push changes
+  #   #   uses: ad-m/github-push-action@master
+  #   #   with:
+  #   #     github_token: ${{ secrets.GITHUB_TOKEN }}
+  #   #     branch: ${{ github.ref }}
+
+  #   - name: Create test environment
+  #     id:   create-env
+  #     if:   ${{ !vars.ENV_ID }}
+  #     uses: a-b/gha-shepherd@main
+  #     with:
+  #       api_endpoint  : ${{ vars.SHEPHERD_API_ENDPOINT }}
+  #       api_token     : ${{ secrets.SHEPHERD_API_TOKEN }}
+  #       command       : create
+  #       debug         : ${{ runner.debug }}
+  #       duration      : 1h
+  #       namespace     : tas-devex
+  #       pool_name     : cfd
+  #       pool_namespace: official
+
+  #   - name: Get running env metadata
+  #     uses: a-b/gha-shepherd@main
+  #     with:
+  #       api_endpoint : ${{ vars.SHEPHERD_API_ENDPOINT }}
+  #       api_token    : ${{ secrets.SHEPHERD_API_TOKEN }}
+  #       command      : get
+  #       debug        : ${{ runner.debug }}
+  #       env_file_path: ./lease.json
+  #       env_id       : ${{ vars.ENV_ID || steps.create-env.outputs.env-id }}
+  #       namespace    : tas-devex
+
+
+  #   # - name: Store lease data
+  #   #   uses: actions/upload-artifact@v4
+  #   #   with:
+  #   #     name: lease-json
+  #   #     path: lease.json
+
+  #   # # use previous lease data to reuse leased environment
+  #   # - name: Retrieve lease data
+  #   #   uses: actions/download-artifact@v4
+  #   #   with:
+  #   #     name: foobar
+
+  #   - name: Deploy and run tests
+  #     run: |
+  #       set -o errexit -o nounset -o pipefail
+
+  #       install_dependencies() {
+
+  #         install_location=/usr/local/bin
+
+  #         latest_bbl_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-bootloader/releases/latest | \
+  #           jq -r ".assets[] | select(.name | test(\"^bbl-.*_linux_amd64$\")) | .browser_download_url")
+  #         curl ${latest_bbl_url:?} --silent --output $install_location/bosh --location
+  #         chmod +x $install_location/bbl
+  #         bbl --version
+
+  #         latest_bosh_url=$(curl -s https://api.github.com/repos/cloudfoundry/bosh-cli/releases/latest | \
+  #           jq -r ".assets[] | select(.name | test(\"^bosh-cli-.*-linux-amd64$\")) | .browser_download_url")
+  #         curl ${latest_bosh_url:?} --silent --output $install_location/bosh --location
+  #         chmod +x $install_location/bosh
+  #         bosh --version
+
+  #       }
+
+  #       setup_bosh_environment() {
+
+  #         jq -r .output lease.json > metadata.json
+
+  #         env_name=$(jq -r .name metadata.json)
+  #         jq -r .bosh.jumpbox_private_key metadata.json > /tmp/${env_name}.priv
+  #         eval "$(bbl print-env --metadata-file metadata.json)"
+
+  #       }
+
+  #       # install_dependencies
+  #       setup_bosh_environment
+
+  #       bosh delete-deployment --force
+  #       bosh deployments
+  #       bosh deploy ./manifests/test.yml
+
+  #       bosh run-errand cf-cli-7-linux-test \
+  #         | tee /tmp/cf-cli-7-linux-test.out
+
+  #       bosh run-errand cf-cli-8-linux-test \
+  #         | tee /tmp/cf-cli-8-linux-test.out
+
+  #       bosh delete-deployment
+  #       bosh clean-up --all
+
+  #   - name: Upload test results
+  #     uses: actions/upload-artifact@v3
   #     with:
   #       name: test-results
-  #       path: /tmp #${{ runner.tmp }}
+  #       path: /tmp/cf-cli-*-test.out
+    
+  # # verify_test_results:
+  # #   runs-on: ubuntu-latest
+  # #   # container:
+  # #   #   image: "ghcr.io/chinigorg/bosh-package-cf-cli-release-ci:187042013-release-workflow-latest"
 
-  #   # - run: |
-  #   #     echo "foobar7" > /tmp/cf-cli-7-test.out
-  #   #     echo "foobar8" > /tmp/cf-cli-7-test.out
+  # #   steps:
+
+  # #   - name: Checkout cli bosh release repo
+  # #     uses: actions/checkout@v3
+
+  # #   - name: Download test results
+  # #     uses: actions/download-artifact@v3
+  # #     with:
+  # #       name: test-results
+  # #       path: /tmp #${{ runner.tmp }}
+
+  # #   # - run: |
+  # #   #     echo "foobar7" > /tmp/cf-cli-7-test.out
+  # #   #     echo "foobar8" > /tmp/cf-cli-7-test.out
 
 
-  #   - name: Display structure of downloaded files
-  #     run: |
-  #       pwd
-  #       unzip test-results.zip
-  #       ls -R
-  #     working-directory: /tmp # ${{ runner.tmp }}
+  # #   - name: Display structure of downloaded files
+  # #     run: |
+  # #       pwd
+  # #       unzip test-results.zip
+  # #       ls -R
+  # #     working-directory: /tmp # ${{ runner.tmp }}
 
-  #   # - name: Verify test results
-  #   #   run: |
-  #   #     echo =====
-  #   #     ls 
-  #   # #     set -x -o errexit -o nounset -o pipefail
-  #   # #     for test_result in /tmp/cf-cli-*-test.out; do
-  #   # #       echo "Test result: $test_result"
-  #   # #       # grep -e Stdout -e Stderr -e "Exit Code" $test_result
-  #   # #       grep -e foo $test_result
-  #   # #       # if grep -q "failed" $test_result; then
-  #   # #       #   echo "Test failed: $test_result"
-  #   # #       #   exit 1
-  #   # #       # fi
-  #   # #     done
+  # #   # - name: Verify test results
+  # #   #   run: |
+  # #   #     echo =====
+  # #   #     ls 
+  # #   # #     set -x -o errexit -o nounset -o pipefail
+  # #   # #     for test_result in /tmp/cf-cli-*-test.out; do
+  # #   # #       echo "Test result: $test_result"
+  # #   # #       # grep -e Stdout -e Stderr -e "Exit Code" $test_result
+  # #   # #       grep -e foo $test_result
+  # #   # #       # if grep -q "failed" $test_result; then
+  # #   # #       #   echo "Test failed: $test_result"
+  # #   # #       #   exit 1
+  # #   # #       # fi
+  # #   # #     done
 
-  #   # # # # # ## Finalize bosh release
-  #   # # # # # ## Get final release from assets
-  #   # # # # # ## Push commit with final release
-  #   # # # # # - name: Finalize bosh release
-  #   # # # # #   if: steps.create-bosh-release-candidate-step.outputs.blobs_updated == 'yes'
-  #   # # # # #   env:
-  #   # # # # #     TRACE: ${{ runner.debug }}
-  #   # # # # #   run: |
-  #   # # # # #     set -o errexit -o nounset -o pipefail
-  #   # # # # #     [[ "${TRACE:-0}" == "1" ]] && set -o xtrace
+  # #   # # # # # ## Finalize bosh release
+  # #   # # # # # ## Get final release from assets
+  # #   # # # # # ## Push commit with final release
+  # #   # # # # # - name: Finalize bosh release
+  # #   # # # # #   if: steps.create-bosh-release-candidate-step.outputs.blobs_updated == 'yes'
+  # #   # # # # #   env:
+  # #   # # # # #     TRACE: ${{ runner.debug }}
+  # #   # # # # #   run: |
+  # #   # # # # #     set -o errexit -o nounset -o pipefail
+  # #   # # # # #     [[ "${TRACE:-0}" == "1" ]] && set -o xtrace
 
-  #   # # # # #     if [[ "${{ steps.create-bosh-release-candidate-step.outputs.blobs_updated }}" == "yes" ]]; then
+  # #   # # # # #     if [[ "${{ steps.create-bosh-release-candidate-step.outputs.blobs_updated }}" == "yes" ]]; then
 
-  #   # # # # #     echo "Bosh Blobs: initial state"
-  #   # # # # #     bosh blobs
+  # #   # # # # #     echo "Bosh Blobs: initial state"
+  # #   # # # # #     bosh blobs
 
-  #   # # # # #     ## Determine next release version number
+  # #   # # # # #     ## Determine next release version number
 
-  #   # # # # #     RELEASE_VERSION=$(cat release-version/version)
-  #   # # # # #     git config --global --add safe.directory "$(pwd)"
-  #   # # # # #     git config user.name  "github-actions[bot]"
-  #   # # # # #     git config user.email "41898282+github-actions[bot]@users.noreply.github.com "
+  # #   # # # # #     RELEASE_VERSION=$(cat release-version/version)
+  # #   # # # # #     git config --global --add safe.directory "$(pwd)"
+  # #   # # # # #     git config user.name  "github-actions[bot]"
+  # #   # # # # #     git config user.email "41898282+github-actions[bot]@users.noreply.github.com "
 
-  #   # # # # #     bosh create-release --final --version="${RELEASE_VERSION}" --tarball="./cf-cli-v${RELEASE_VERSION}.tgz"
+  # #   # # # # #     bosh create-release --final --version="${RELEASE_VERSION}" --tarball="./cf-cli-v${RELEASE_VERSION}.tgz"
 
-  #   # # # # #     git add --all
-  #   # # # # #     git status
-  #   # # # # #     git commit -m "create final release ${RELEASE_VERSION}"
+  # #   # # # # #     git add --all
+  # #   # # # # #     git status
+  # #   # # # # #     git commit -m "create final release ${RELEASE_VERSION}"
 
-  #   # # # # #     ls -lah ./candidate-release-output/cf-cli-dev-release.tgz
+  # #   # # # # #     ls -lah ./candidate-release-output/cf-cli-dev-release.tgz
 
-  #   # # # - name: Delete lease with provided env_id and namespace
-  #   # # #   if:   ${{ always() && !vars.ENV_ID }}
-  #   # # #   uses: a-b/gha-shepherd@main
-  #   # # #   with:
-  #   # # #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
-  #   # # #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-  #   # # #     command:      delete
-  #   # # #     debug:        ${{ runner.debug }}
-  #   # # #     env_id:       ${{ steps.claim-env.outputs.env-id }}
-  #   # # #     namespace:    tas-devex
+  # #   # # # - name: Delete lease with provided env_id and namespace
+  # #   # # #   if:   ${{ always() && !vars.ENV_ID }}
+  # #   # # #   uses: a-b/gha-shepherd@main
+  # #   # # #   with:
+  # #   # # #     api_endpoint: ${{ vars.SHEPHERD_API_ENDPOINT }}
+  # #   # # #     api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+  # #   # # #     command:      delete
+  # #   # # #     debug:        ${{ runner.debug }}
+  # #   # # #     env_id:       ${{ steps.claim-env.outputs.env-id }}
+  # #   # # #     namespace:    tas-devex
 
-  #   # # # - name: Setup tmate session
-  #   # # #   if: ${{ always() && runner.debug }}
-  #   # # #   uses: mxschmitt/action-tmate@v3
-  #   # # #   timeout-minutes: 20
+  # #   # # # - name: Setup tmate session
+  # #   # # #   if: ${{ always() && runner.debug }}
+  # #   # # #   uses: mxschmitt/action-tmate@v3
+  # #   # # #   timeout-minutes: 20
