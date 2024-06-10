@@ -1,26 +1,29 @@
-# ifndef GITHUB_USER
-# 	$(error GITHUB_USER is not set)
-# endif
+GITHUB_TOKEN:=$(shell gh auth token || (gh auth login --scopes write:packages && gh auth token))
 
-create-bosh-release:
+pre-check:
+ifndef GITHUB_USER
+	$(error GITHUB_USER is not set)
+endif
+
+create-bosh-release: pre-check
 	act \
 		--actor "${GITHUB_USER}" \
 		--secret GITHUB_TOKEN="${GITHUB_TOKEN}" \
 		--workflows .github/workflows/create-bosh-release.yml
 
-ensure-ci-image:
+ensure-ci-image: pre-check 
 	act \
 		--actor "${GITHUB_USER}" \
 		--secret GITHUB_TOKEN="${GITHUB_TOKEN}" \
 		--workflows .github/workflows/ensure-ci-image.yml
 
-lint:
+lint: pre-check
 	act \
 		--actor "${GITHUB_USER}" \
 		--secret GITHUB_TOKEN="${GITHUB_TOKEN}" \
 		--workflows .github/workflows/lint.yml
 
-run:
+run: pre-check
 	@echo "Running make with arguments after -- : $(MAKECMDGOALS)"
 
 	# find . -name '.git' -prune -o -type f -print | entr -c \
@@ -35,8 +38,8 @@ run:
 			--artifact-server-path /tmp/artifacts \
 			$(MAKECMDGOALS)
 
-hijack-act:
+hijack-act: pre-check
 	./ci/scripts/hijack-act.sh
 
-bosh:
+bosh: pre-check
 	./ci/scripts/bosh-connect.sh
