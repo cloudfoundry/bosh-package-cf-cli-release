@@ -5,25 +5,22 @@ set -e
 export BOSH_DEPLOYMENT=cf-cli-test
 export BOSH_NON_INTERACTIVE=true
 
-echo "-----> `date`: Delete previous deployment"
+echo "-----> $(date): Delete previous deployment"
 bosh delete-deployment --force
 
-echo "-----> `date`: Deploy"
+echo "-----> $(date): Deploy"
 bosh deploy ./manifests/test.yml
 
-echo "-----> `date`: Run test errand for cf6"
-bosh run-errand cf-cli-6-linux-test
-
-echo "-----> `date`: Run test errand for cf7"
+echo "-----> $(date): Run test errand for cf7"
 bosh run-errand cf-cli-7-linux-test
 
-echo "-----> `date`: Run test errand for cf8"
+echo "-----> $(date): Run test errand for cf8"
 bosh run-errand cf-cli-8-linux-test
 
-echo "-----> `date`: Delete deployments"
+echo "-----> $(date): Delete deployments"
 bosh delete-deployment
 
-echo "-----> `date`: Clean up"
+echo "-----> $(date): Clean up"
 bosh clean-up --all
 
-echo "-----> `date`: Done"
+echo "-----> $(date): Done"
