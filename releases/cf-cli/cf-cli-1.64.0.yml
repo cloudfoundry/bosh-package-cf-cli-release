@@ -1,0 +1,42 @@
+name: cf-cli
+version: 1.64.0
+commit_hash: 2e39c77
+uncommitted_changes: false
+jobs:
+- name: cf-cli-7-linux
+  version: 72f1e1ed527093a87feee05451d68e3654c5b326cd70df97b16f8885aef76d9a
+  fingerprint: 72f1e1ed527093a87feee05451d68e3654c5b326cd70df97b16f8885aef76d9a
+  sha1: sha256:f33f9c6f5bbc80ddb799fe2fd0cec8f262afb644cf5b49df8a4863071874f0e1
+  packages:
+  - cf-cli-7-linux
+- name: cf-cli-7-linux-test
+  version: 2bf08924ce324cee14b9b932e66929328038de9ffa9000b72835e9b427588d46
+  fingerprint: 2bf08924ce324cee14b9b932e66929328038de9ffa9000b72835e9b427588d46
+  sha1: sha256:9a572d38027dd28042e15e15de4261aad5aec812475284e2c29f87202c7863b8
+  packages: []
+- name: cf-cli-8-linux
+  version: ca67b6ff6fa10594b63e220043ab7fa0c1e705b0061990dce171202e4b887b90
+  fingerprint: ca67b6ff6fa10594b63e220043ab7fa0c1e705b0061990dce171202e4b887b90
+  sha1: sha256:0fb35df089eb5b27a568cd087539648bf479d91113f229bbf9c9c451db47204e
+  packages:
+  - cf-cli-8-linux
+- name: cf-cli-8-linux-test
+  version: bdf2b10e03ed3a0a93724c7dd802c0f24ad5c4433ec34266fa87b93cf3282c4b
+  fingerprint: bdf2b10e03ed3a0a93724c7dd802c0f24ad5c4433ec34266fa87b93cf3282c4b
+  sha1: sha256:fbc0dae626da53802dea64238335dbb770d8895e895b2443f1026cc384f6a605
+  packages: []
+packages:
+- name: cf-cli-7-linux
+  version: fba1d7acf2771239baf931f7479ff85c2e4925e02adeac01d9cd0d82e6dcc4a0
+  fingerprint: fba1d7acf2771239baf931f7479ff85c2e4925e02adeac01d9cd0d82e6dcc4a0
+  sha1: sha256:0510a3f3d4eff0211e4b9be4697882492cea2a7cb8c77e0921ac569ef3894849
+  dependencies: []
+- name: cf-cli-8-linux
+  version: bf102f9e3e7b4119abfee5f81884111c1685bcc22a0704ff335de974581eb5ee
+  fingerprint: bf102f9e3e7b4119abfee5f81884111c1685bcc22a0704ff335de974581eb5ee
+  sha1: sha256:9c6ba2eb0e423ed30b72e3aca9657f7d7206cf20bfa7b20f0281050631b4b99e
+  dependencies: []
+license:
+  version: 70774449f897cf766b941032580909f941852dbf78e0842b0c79715ecdcc481f
+  fingerprint: 70774449f897cf766b941032580909f941852dbf78e0842b0c79715ecdcc481f
+  sha1: sha256:7d8dfcc96511226ec42c7906799efe3f50e75238a4de5f7a740522174d1745fe
