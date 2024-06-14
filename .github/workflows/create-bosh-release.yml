@@ -1,18 +1,326 @@
-name: Create Release
-
+name: Create Bosh Release
 on:
   workflow_dispatch:
-  push:
-    tags:
-    - "v9.*"
-    - "v8.*"
-    - "v7.*"
+    inputs:
+      version_bump_type:
+        type: choice
+        default: minor
+        description: Make a choice
+        options:
+        - patch
+        - minor
+        - major
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  BOSH_DEPLOYMENT:      cf-cli-test
+  BOSH_NON_INTERACTIVE: true
+  PAGER:                cat
 
 jobs:
-  acquire_binaries:
+  create_bosh_release:
+    name: Create Bosh Release
     runs-on: ubuntu-latest
+    container:
+      image: "ghcr.io/${{ github.repository }}-ci:${{ github.ref_name }}-latest"
+    permissions:
+      contents: write
+
     steps:
-        - name: Setup upterm session
-          if: always()
-          uses: lhotari/action-upterm@v1
-          timeout-minutes: 60
+    - name: Checkout cli bosh release repo
+      uses: actions/checkout@v4
+
+    - name: Acquire latest CF CLI binaries
+      run: |
+        ./ci/scripts/download-cf-cli-binary.sh --major-version 7 --output-dir ./build/cf-cli-binaries
+        ./ci/scripts/download-cf-cli-binary.sh --major-version 8 --output-dir ./build/cf-cli-binaries
+
+    - name: Overwrite config/final.yml with the destination bucket
+      run: |
+       cat << EOF > config/final.yml
+       name: cf-cli
+       blobstore:
+         provider: s3
+         options:
+           region:      ${{ vars.AWS_S3_REGION }}
+           bucket_name: ${{ vars.AWS_S3_BUCKET }}
+           endpoint:    http://s3-us-west-1.amazonaws.com
+       EOF
+
+    - name: Configure S3 backend for bosh in config/private.yml
+      if:   ${{ vars.PRODUCTION == 'true' }}
+      run: |
+       cat << EOF > config/private.yml
+       blobstore:
+         options:
+           access_key_id:     "${{ secrets.AWS_S3_ACCESS_KEY_ID     }}"
+           assume_role_arn:   "${{ secrets.AWS_S3_ASSUME_ROLE_ARN   }}"
+           secret_access_key: "${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}"
+       EOF
+
+    - name: Create bosh release candidate
+      run: |
+        ./ci/scripts/create-bosh-release-candidate.sh \
+          --downloaded-binaries-dir ./build/cf-cli-binaries \
+          --git-username "github-actions[bot]" \
+          --git-email "41898282+github-actions[bot]@users.noreply.github.com"
+
+    - name: Store bosh release artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: bosh-release-candidate
+        path: ./cf-cli-dev-release.tgz
+
+    - name: Upload bosh blobs to blobstore
+      if:   ${{ vars.PRODUCTION == 'true' }}
+      run: |
+        bosh upload-blobs
+
+    - name: Push changes
+      if:   ${{ vars.PRODUCTION == 'true' }}
+      uses: ad-m/github-push-action@9870d48124da805820c70ebc6ba563c715551019
+      with:
+        branch:        ${{ format('{0}{1}', github.ref, vars.BRANCH_SUFFIX) }}
+        github_token:  ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create test environment
+      id:   create-env
+      if: ${{ !(vars.ENV_ID || vars.SKIP_TESTS == 'true') }}
+      uses: a-b/gha-shepherd@latest
+      with:
+        api_endpoint:    ${{ secrets.SHEPHERD_API_ENDPOINT }}
+        api_token:       ${{ secrets.SHEPHERD_API_TOKEN }}
+        command:         create
+        debug:           ${{ runner.debug }}
+        duration:        1h
+        namespace:       tas-devex
+        pool_name:       cfd
+        pool_namespace:  official
+
+    - name: Get running env metadata
+      if: ${{ vars.SKIP_TESTS != 'true' }}
+      uses: a-b/gha-shepherd@latest
+      with:
+        api_endpoint:   ${{ secrets.SHEPHERD_API_ENDPOINT }}
+        api_token:      ${{ secrets.SHEPHERD_API_TOKEN }}
+        command:        get
+        debug:          ${{ runner.debug }}
+        env_file_path:  lease.json
+        env_id:         ${{ vars.ENV_ID || steps.create-env.outputs.env-id }}
+        namespace:      tas-devex
+
+    - name: Store lease data
+      if: ${{ vars.SKIP_TESTS != 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: lease-json
+        path: lease.json
+
+    - name: Deploy and run tests
+      if: ${{ vars.SKIP_TESTS != 'true' }}
+      run: |
+        rm lease.json
+
+    # use previous lease data to reuse leased environment
+    - name: Retrieve lease data
+      if: ${{ vars.SKIP_TESTS != 'true' }}
+      uses: actions/download-artifact@v4
+      with:
+        name: lease-json
+
+    - name: Deploy and run tests
+      if: ${{ vars.SKIP_TESTS != 'true' }}
+      run: |
+        setup_bosh_environment() {
+
+          jq -r .output lease.json > metadata.json
+
+          env_name=$(jq -r .name metadata.json)
+          jq -r .bosh.jumpbox_private_key metadata.json > /tmp/${env_name}.priv
+          eval "$(bbl print-env --metadata-file metadata.json)"
+
+        }
+
+        setup_bosh_environment
+
+        bosh delete-deployment --force
+        bosh deployments
+
+        echo "::group::Bosh deploy"
+        bosh deploy ./manifests/test.yml
+        echo "::endgroup::"
+
+        echo "::group::Bosh run-errand cf-cli-7-linux-test"
+        bosh run-errand cf-cli-7-linux-test \
+          | tee /tmp/cf-cli-7-linux-test.out
+        echo "::endgroup::"
+
+        echo "::group::Bosh run-errand cf-cli-8-linux-test"
+        bosh run-errand cf-cli-8-linux-test \
+          | tee /tmp/cf-cli-8-linux-test.out
+        echo "::endgroup::"
+
+        bosh delete-deployment
+        bosh clean-up --all
+
+    - name: Upload artifacts with test results
+      if: ${{ vars.SKIP_TESTS != 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: /tmp/cf-cli-*-test.out
+    
+    - name: Retrieve test results
+      if: ${{ vars.SKIP_TESTS != 'true' }}
+      uses: actions/download-artifact@v4
+      with:
+        name: test-results
+        path: /tmp
+
+    - name: Verify test results
+      if: ${{ vars.SKIP_TESTS != 'true' }}
+      run: |
+        set -x -o errexit -o nounset -o pipefail
+        for test_result in /tmp/cf-cli-*-test.out; do
+          cf_version=$(grep -e 'cf version' $test_result | sed 's/cf version //')
+          echo "result_${test_result%.*}=${cf_version}" >> $GITHUB_OUTPUT
+        done
+
+    - name: Generate next release version
+      id: generate-next-release-version
+      env:
+        # BUMP_TYPE: ${{ inputs.version_bump_type }}
+        BUMP_TYPE: minor
+      run: |
+        _last_cf_cli_bosh_release_version=$(find releases/cf-cli -name 'cf-cli-*.yml' | sort -V | tail -1 | sed 's/.*cf-cli-\([[:digit:]].*\).yml/\1/')
+        echo "Last CF CLI bosh release version: ${_last_cf_cli_bosh_release_version}"
+
+        if ! [[ "$_last_cf_cli_bosh_release_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Release version must be in the format X.Y.Z"
+          exit 1
+        fi
+
+        IFS='.' read -r -a version_parts <<< "$_last_cf_cli_bosh_release_version"
+        major="${version_parts[0]}"
+        minor="${version_parts[1]}"
+        patch="${version_parts[2]}"
+
+        case "$BUMP_TYPE" in
+          major)
+            major=$((major + 1))
+            minor=0
+            patch=0
+            ;;
+          minor)
+            minor=$((minor + 1))
+            patch=0
+            ;;
+          patch)
+            patch=$((patch + 1))
+            ;;
+          *)
+            echo "BUMP_TYPE must be one of: major, minor, patch"
+            exit 1
+            ;;
+        esac
+
+        _new_cf_cli_bosh_release_version="${major}.${minor}.${patch}"
+
+        echo "New CF CLI bosh release version: ${_new_cf_cli_bosh_release_version}"
+        echo "version=${_new_cf_cli_bosh_release_version}" >> $GITHUB_OUTPUT
+
+
+    # Finalize bosh release
+    # Get final release from assets
+    # Push commit with final release
+    - name: Finalize bosh release
+      env:
+        TRACE:            ${{ runner.debug }}
+        RELEASE_VERSION:  ${{ steps.generate-next-release-version.outputs.version }}
+      run: |
+        set -o errexit -o nounset -o pipefail
+        [[ "${TRACE:-0}" == "1" ]] && set -o xtrace
+
+        echo "Releasing version: ${RELEASE_VERSION:?}"
+        echo "::group::Blobs included in cf-cli release: v${RELEASE_VERSION}"
+        bosh blobs
+        echo "::endgroup::"
+
+        git config --global --add safe.directory "$(pwd)"
+        git config user.name  "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com "
+
+        echo "::group::Git state before final release"
+        git diff --patch
+        git status
+        echo "::endgroup::"
+
+        git update-index --skip-worktree config/blobs.yml
+        git update-index --skip-worktree config/final.yml
+
+        bosh create-release --final --version="${RELEASE_VERSION}" --tarball="./cf-cli-v${RELEASE_VERSION}.tgz"
+
+        echo "::group::Git state after final release"
+        git diff --patch
+        git status
+        echo "::endgroup::"
+
+        git add \
+          .final_builds/packages/cf-cli-7-linux/index.yml \
+          .final_builds/packages/cf-cli-8-linux/index.yml \
+          releases
+
+        echo "::group::Git before the commit"
+        git diff --patch
+        git status
+        echo "::endgroup::"
+
+        _message="create final release ${RELEASE_VERSION}"
+        git commit --message "${_message}"
+        git log --pretty=full --max-count=3
+
+        _git_tag="v${RELEASE_VERSION:?}"
+        git tag $_git_tag
+
+    - name: Push changes
+      if:   ${{ vars.PRODUCTION == 'true' }}
+      uses: ad-m/github-push-action@9870d48124da805820c70ebc6ba563c715551019
+      with:
+        branch:        ${{ format('{0}{1}', github.ref, vars.BRANCH_SUFFIX) }}
+        github_token:  ${{ secrets.GITHUB_TOKEN }}
+        tags:          true
+
+    - name: Generate Release Notes
+      run: |
+        _cf_cli_versions=$(bosh blobs | cut -d_ -f2)
+
+        cat << EOF > release_notes
+        ### Included CF CLI versions:
+
+        ${_cf_cli_versions:?}
+        EOF
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path:                release_notes
+        fail_on_unmatched_files:  true
+        make_latest:              true
+        name:                     v${{ steps.generate-next-release-version.outputs.version }}
+        tag_name:                 v${{ steps.generate-next-release-version.outputs.version }}
+        files: |
+          ./cf-cli-v${{ steps.generate-next-release-version.outputs.version }}.tgz
+
+    - name: Delete lease with provided env_id and namespace
+      if:   ${{ always() && !vars.ENV_ID && steps.create-env.outcome == 'success' && !runner.debug }}
+      uses: a-b/gha-shepherd@latest
+      with:
+        api_endpoint: ${{ secrets.SHEPHERD_API_ENDPOINT }}
+        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
+        command:      delete
+        debug:        ${{ runner.debug }}
+        env_id:       ${{ steps.create-env.outputs.env-id }}
+        namespace:    tas-devex

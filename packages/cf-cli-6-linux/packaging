@@ -1,8 +1,0 @@
-#!/bin/bash
-
-set -exu
-
-tar xzf cf-cli_6.*_linux_x86-64.tgz
-
-mkdir ${BOSH_INSTALL_TARGET}/bin
-cp ./cf ${BOSH_INSTALL_TARGET}/bin/cf
