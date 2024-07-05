@@ -89,7 +89,7 @@ jobs:
     - name: Create test environment
       id:   create-env
       if: ${{ !(vars.ENV_ID || vars.SKIP_TESTS == 'true') }}
-      uses: a-b/gha-shepherd@latest
+      uses: pivotal-cf/gha-shepherd@latest
       with:
         api_endpoint:    ${{ secrets.SHEPHERD_API_ENDPOINT }}
         api_token:       ${{ secrets.SHEPHERD_API_TOKEN }}
@@ -102,7 +102,7 @@ jobs:
 
     - name: Get running env metadata
       if: ${{ vars.SKIP_TESTS != 'true' }}
-      uses: a-b/gha-shepherd@latest
+      uses: pivotal-cf/gha-shepherd@latest
       with:
         api_endpoint:   ${{ secrets.SHEPHERD_API_ENDPOINT }}
         api_token:      ${{ secrets.SHEPHERD_API_TOKEN }}
@@ -316,7 +316,7 @@ jobs:
 
     - name: Delete lease with provided env_id and namespace
       if:   ${{ always() && !vars.ENV_ID && steps.create-env.outcome == 'success' && !runner.debug }}
-      uses: a-b/gha-shepherd@latest
+      uses: pivotal-cf/gha-shepherd@latest
       with:
         api_endpoint: ${{ secrets.SHEPHERD_API_ENDPOINT }}
         api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
