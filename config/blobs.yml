@@ -1,3 +1,6 @@
 cf7-cli_7.7.11_linux_x86-64.tgz:
   size: 7621987
   sha: sha256:ae53cdb542cb0a84d18cf21f2d5c89613caf2a6679e284ae6ef6f3f561e0b09a
+cf8-cli_8.7.11_linux_x86-64.tgz:
+  size: 8943650
+  sha: sha256:a9f32cb0a9f55ee729738bb7f01637ce57bdf30aaf17bfe2250d2e6b93ab5937
