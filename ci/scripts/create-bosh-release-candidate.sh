@@ -30,6 +30,7 @@ add_and_commit_blob() {
 
   echo "::group::Adding blob for v${_major_version} - ${_downloaded_tarball_basename}"
   bosh add-blob "${_downloaded_tarball}" "${_downloaded_tarball_basename}"
+  bosh upload-blobs
   diff_and_commit_with_message "Setting CF CLI v${_major_version} to ${_full_version}"
   echo "::endgroup::"
 }
@@ -60,6 +61,7 @@ update_and_commit_blob() {
 
   echo "::group::Adding blob for v${_major_version} - ${_downloaded_tarball_basename}"
   bosh add-blob "${_downloaded_tarball}" "${_downloaded_tarball_basename}"
+  bosh upload-blobs
   diff_and_commit_with_message "Updating CF CLI v${_major_version} from ${_published_version} to ${_new_version}"
   echo "::endgroup::"
 }
