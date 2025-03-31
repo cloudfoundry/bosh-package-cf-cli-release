@@ -38,9 +38,9 @@ download_cf_cli_binary() {
   # Download specified binary
   echo "Downloading CF CLI ${_major_version} to directory ${_resolved_output_dir}"
 
-  mkdir -p ${_resolved_output_dir}
   wget --trust-server-names \
-    --output-document="${_resolved_output_dir}/cf${_major_version}-cli_${_major_version}._linux_x86-64.tgz" \
+    --content-disposition \
+    --directory-prefix "${_resolved_output_dir}" \
     --no-verbose \
      "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v${_major_version}&source=bosh-package-cf-cli-release-workflow"
 

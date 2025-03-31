@@ -28,6 +28,8 @@ jobs:
       image: "ghcr.io/${{ github.repository }}-ci:${{ github.ref_name }}-latest"
     permissions:
       contents: write
+    env:
+      TRACE:            ${{ runner.debug }}
 
     steps:
     - name: Checkout cli bosh release repo
