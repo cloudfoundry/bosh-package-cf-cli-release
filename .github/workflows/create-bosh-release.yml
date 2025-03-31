@@ -35,7 +35,6 @@ jobs:
 
     - name: Acquire latest CF CLI binaries
       run: |
-        ./ci/scripts/download-cf-cli-binary.sh --major-version 7 --output-dir ./build/cf-cli-binaries
         ./ci/scripts/download-cf-cli-binary.sh --major-version 8 --output-dir ./build/cf-cli-binaries
 
     - name: Overwrite config/final.yml with the destination bucket
@@ -153,11 +152,6 @@ jobs:
         bosh deploy ./manifests/test.yml
         echo "::endgroup::"
 
-        echo "::group::Bosh run-errand cf-cli-7-linux-test"
-        bosh run-errand cf-cli-7-linux-test \
-          | tee /tmp/cf-cli-7-linux-test.out
-        echo "::endgroup::"
-
         echo "::group::Bosh run-errand cf-cli-8-linux-test"
         bosh run-errand cf-cli-8-linux-test \
           | tee /tmp/cf-cli-8-linux-test.out
@@ -269,7 +263,6 @@ jobs:
         echo "::endgroup::"
 
         git add \
-          .final_builds/packages/cf-cli-7-linux/index.yml \
           .final_builds/packages/cf-cli-8-linux/index.yml \
           releases
 

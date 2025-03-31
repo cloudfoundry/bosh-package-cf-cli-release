@@ -11,9 +11,6 @@ bosh delete-deployment --force
 echo "-----> $(date): Deploy"
 bosh deploy ./manifests/test.yml
 
-echo "-----> $(date): Run test errand for cf7"
-bosh run-errand cf-cli-7-linux-test
-
 echo "-----> $(date): Run test errand for cf8"
 bosh run-errand cf-cli-8-linux-test
 
