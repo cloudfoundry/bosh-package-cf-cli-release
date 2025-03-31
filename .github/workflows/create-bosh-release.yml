@@ -28,8 +28,6 @@ jobs:
       image: "ghcr.io/${{ github.repository }}-ci:${{ github.ref_name }}-latest"
     permissions:
       contents: write
-    env:
-      TRACE:            ${{ runner.debug }}
 
     steps:
     - name: Checkout cli bosh release repo
@@ -63,6 +61,8 @@ jobs:
        EOF
 
     - name: Create bosh release candidate
+      env:
+        TRACE:            ${{ runner.debug }}
       run: |
         ./ci/scripts/create-bosh-release-candidate.sh \
           --downloaded-binaries-dir ./build/cf-cli-binaries \
