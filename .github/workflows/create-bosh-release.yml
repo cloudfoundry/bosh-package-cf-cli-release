@@ -25,7 +25,7 @@ jobs:
     name: Create Bosh Release
     runs-on: ubuntu-latest
     container:
-      image: "ghcr.io/${{ github.repository }}-ci:${{ github.ref_name }}-latest"
+      image: "ghcr.io/${{ github.repository }}-ci:main-latest"
     permissions:
       contents: write
 
@@ -188,8 +188,7 @@ jobs:
     - name: Generate next release version
       id: generate-next-release-version
       env:
-        # BUMP_TYPE: ${{ inputs.version_bump_type }}
-        BUMP_TYPE: minor
+        BUMP_TYPE: ${{ inputs.version_bump_type }}
       run: |
         _last_cf_cli_bosh_release_version=$(find releases/cf-cli -name 'cf-cli-*.yml' | sort -V | tail -1 | sed 's/.*cf-cli-\([[:digit:]].*\).yml/\1/')
         echo "Last CF CLI bosh release version: ${_last_cf_cli_bosh_release_version}"
