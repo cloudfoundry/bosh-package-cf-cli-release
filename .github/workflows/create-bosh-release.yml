@@ -189,7 +189,6 @@ jobs:
       id: generate-next-release-version
       env:
         BUMP_TYPE: ${{ inputs.version_bump_type }}
-        # BUMP_TYPE: minor
       run: |
         _last_cf_cli_bosh_release_version=$(find releases/cf-cli -name 'cf-cli-*.yml' | sort -V | tail -1 | sed 's/.*cf-cli-\([[:digit:]].*\).yml/\1/')
         echo "Last CF CLI bosh release version: ${_last_cf_cli_bosh_release_version}"
@@ -280,34 +279,34 @@ jobs:
         _git_tag="v${RELEASE_VERSION:?}"
         git tag $_git_tag
 
-    # - name: Push changes
-    #   if:   ${{ vars.PRODUCTION == 'true' }}
-    #   uses: ad-m/github-push-action@9870d48124da805820c70ebc6ba563c715551019
-    #   with:
-    #     branch:        ${{ format('{0}{1}', github.ref, vars.BRANCH_SUFFIX) }}
-    #     github_token:  ${{ secrets.GITHUB_TOKEN }}
-    #     tags:          true
+    - name: Push changes
+      if:   ${{ vars.PRODUCTION == 'true' }}
+      uses: ad-m/github-push-action@9870d48124da805820c70ebc6ba563c715551019
+      with:
+        branch:        ${{ format('{0}{1}', github.ref, vars.BRANCH_SUFFIX) }}
+        github_token:  ${{ secrets.GITHUB_TOKEN }}
+        tags:          true
 
-    # - name: Generate Release Notes
-    #   run: |
-    #     _cf_cli_versions=$(bosh blobs | cut -d_ -f2)
+    - name: Generate Release Notes
+      run: |
+        _cf_cli_versions=$(bosh blobs | cut -d_ -f2)
 
-    #     cat << EOF > release_notes
-    #     ### Included CF CLI versions:
+        cat << EOF > release_notes
+        ### Included CF CLI versions:
 
-    #     ${_cf_cli_versions:?}
-    #     EOF
+        ${_cf_cli_versions:?}
+        EOF
 
-    # - name: Create GitHub Release
-    #   uses: softprops/action-gh-release@v2
-    #   with:
-    #     body_path:                release_notes
-    #     fail_on_unmatched_files:  true
-    #     make_latest:              true
-    #     name:                     v${{ steps.generate-next-release-version.outputs.version }}
-    #     tag_name:                 v${{ steps.generate-next-release-version.outputs.version }}
-    #     files: |
-    #       ./cf-cli-v${{ steps.generate-next-release-version.outputs.version }}.tgz
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path:                release_notes
+        fail_on_unmatched_files:  true
+        make_latest:              true
+        name:                     v${{ steps.generate-next-release-version.outputs.version }}
+        tag_name:                 v${{ steps.generate-next-release-version.outputs.version }}
+        files: |
+          ./cf-cli-v${{ steps.generate-next-release-version.outputs.version }}.tgz
 
     - name: Delete lease with provided env_id and namespace
       if:   ${{ always() && !vars.ENV_ID && steps.create-env.outcome == 'success' && !runner.debug }}
