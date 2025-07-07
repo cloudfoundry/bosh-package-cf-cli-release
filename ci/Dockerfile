@@ -1,9 +1,10 @@
 FROM summerwind/actions-runner:latest
 
-ENV bbl_version 8.4.111
-ENV bosh_cli_version 7.2.3
+ENV bbl_version 9.0.35
+ENV bosh_cli_version 7.7.2
 ENV NODE_VERSION 22.2.0
-ENV terraform_version 0.11.5
+ENV terraform_version 1.12.2
+ENV credhub_version 2.9.45
 
 USER root
 RUN usermod -a -G sudo root
@@ -14,6 +15,8 @@ RUN \
   apt-get update && \
   apt-get -y install \
     shellcheck \
+    ruby-full \
+    wamerican \
     yamllint && \
   apt list --installed
 
@@ -68,7 +71,7 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
 
 # bosh-cli
 RUN \
-  wget --no-verbose https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-${bosh_cli_version}-linux-amd64 --output-document="/usr/local/bin/bosh" && \
+  curl https://github.com/cloudfoundry/bosh-cli/releases/download/v${bosh_cli_version}/bosh-cli-${bosh_cli_version}-linux-amd64 --silent --output /usr/local/bin/bosh --location && \
   chmod +x /usr/local/bin/bosh
 
 # bbl and dependencies
@@ -93,3 +96,8 @@ RUN \
   cd /usr/local/bin && \
   chmod +x terraform && \
   rm -rf /tmp/*
+
+RUN \
+  curl https://github.com/cloudfoundry/credhub-cli/releases/download/${credhub_version}/credhub-linux-amd64-${credhub_version}.tgz --silent --location --output /tmp/credhub.tgz && \
+  tar -xzf /tmp/credhub.tgz -C /usr/local/bin && \
+  chmod +x /usr/local/bin/credhub 

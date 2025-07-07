@@ -19,7 +19,9 @@ env:
   BOSH_DEPLOYMENT:      cf-cli-test
   BOSH_NON_INTERACTIVE: true
   PAGER:                cat
-
+  BBL_IAAS: gcp
+  BBL_GCP_REGION: us-east1
+  BBL_GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_CREDENTIALS_JSON }}
 jobs:
   create_bosh_release:
     name: Create Bosh Release
@@ -38,6 +40,7 @@ jobs:
         ./ci/scripts/download-cf-cli-binary.sh --major-version 8 --output-dir ./build/cf-cli-binaries
 
     - name: Overwrite config/final.yml with the destination bucket
+      if:   ${{ vars.PRODUCTION == 'true' }}
       run: |
        cat << EOF > config/final.yml
        name: cf-cli
@@ -87,68 +90,60 @@ jobs:
         branch:        ${{ format('{0}{1}', github.ref, vars.BRANCH_SUFFIX) }}
         github_token:  ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Create test environment
-      id:   create-env
-      if: ${{ !(vars.ENV_ID || vars.SKIP_TESTS == 'true') }}
-      uses: pivotal-cf/gha-shepherd@latest
+    - name: Checkout bosh-bootloader
+      uses: actions/checkout@v4
       with:
-        api_endpoint:    ${{ secrets.SHEPHERD_API_ENDPOINT }}
-        api_token:       ${{ secrets.SHEPHERD_API_TOKEN }}
-        command:         create
-        debug:           ${{ runner.debug }}
-        duration:        1h
-        namespace:       tas-devex
-        pool_name:       cfd
-        pool_namespace:  official
+        repository: cloudfoundry/bosh-bootloader
+        path: bosh-bootloader
 
-    - name: Get running env metadata
-      if: ${{ vars.SKIP_TESTS != 'true' }}
-      uses: pivotal-cf/gha-shepherd@latest
-      with:
-        api_endpoint:   ${{ secrets.SHEPHERD_API_ENDPOINT }}
-        api_token:      ${{ secrets.SHEPHERD_API_TOKEN }}
-        command:        get
-        debug:          ${{ runner.debug }}
-        env_file_path:  lease.json
-        env_id:         ${{ vars.ENV_ID || steps.create-env.outputs.env-id }}
-        namespace:      tas-devex
+    - name: Setup bbl
+      id: setup-bbl-env
+      run: |
+        env_name="$(grep '^.\{1,4\}$' /usr/share/dict/words |
+        shuf -n1 |
+        tr -dc '[:alnum:]\n\r' |
+        tr '[:upper:]' '[:lower:]')"
 
-    - name: Store lease data
-      if: ${{ vars.SKIP_TESTS != 'true' }}
-      uses: actions/upload-artifact@v4
+        if [ ! -z "${env_name}" ]; then
+          env_name=cli-bosh-rel-${env_name}
+          mkdir -p $env_name/bbl-state
+        fi
+        echo "Bbl environment name: $env_name"
+        echo "envName=$env_name" >> $GITHUB_OUTPUT
+
+    - name: Create bbl env
+      id: create-env
+      run: |
+        env_name=${{ steps.setup-bbl-env.outputs.envName }}
+        cd $env_name/bbl-state
+
+        cp -R ${GITHUB_WORKSPACE}/bosh-bootloader/plan-patches/bosh-lite-gcp/* .
+        bbl plan --name $env_name
+        bbl up
+        eval "$(bbl print-env)"
+        bosh upload-stemcell "https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-jammy-go_agent?v=${{ vars.STEMCELL_VERSION }}"
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
       with:
-        name: lease-json
-        path: lease.json
+        credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+
+    - name: Setup gcloud CLI
+      uses: google-github-actions/setup-gcloud@v1
+
+    - name: Save bbl state
+      run: |
+        env_name=${{ steps.setup-bbl-env.outputs.envName }}
+        gsutil -m cp -P -R ./$env_name gs://cf-cli-bosh-lites/    
 
     - name: Deploy and run tests
       if: ${{ vars.SKIP_TESTS != 'true' }}
       run: |
-        rm lease.json
+        env_name=${{ steps.setup-bbl-env.outputs.envName }}
 
-    # use previous lease data to reuse leased environment
-    - name: Retrieve lease data
-      if: ${{ vars.SKIP_TESTS != 'true' }}
-      uses: actions/download-artifact@v4
-      with:
-        name: lease-json
-
-    - name: Deploy and run tests
-      if: ${{ vars.SKIP_TESTS != 'true' }}
-      run: |
-        setup_bosh_environment() {
-
-          jq -r .output lease.json > metadata.json
-
-          env_name=$(jq -r .name metadata.json)
-          jq -r .bosh.jumpbox_private_key metadata.json > /tmp/${env_name}.priv
-          eval "$(bbl print-env --metadata-file metadata.json)"
-
-        }
-
-        setup_bosh_environment
-
-        bosh delete-deployment --force
-        bosh deployments
+        pushd $env_name/bbl-state
+          eval "$(bbl print-env)"
+        popd
 
         echo "::group::Bosh deploy"
         bosh deploy ./manifests/test.yml
@@ -161,21 +156,7 @@ jobs:
 
         bosh delete-deployment
         bosh clean-up --all
-
-    - name: Upload artifacts with test results
-      if: ${{ vars.SKIP_TESTS != 'true' }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: /tmp/cf-cli-*-test.out
-    
-    - name: Retrieve test results
-      if: ${{ vars.SKIP_TESTS != 'true' }}
-      uses: actions/download-artifact@v4
-      with:
-        name: test-results
-        path: /tmp
-
+        
     - name: Verify test results
       if: ${{ vars.SKIP_TESTS != 'true' }}
       run: |
@@ -308,13 +289,11 @@ jobs:
         files: |
           ./cf-cli-v${{ steps.generate-next-release-version.outputs.version }}.tgz
 
-    - name: Delete lease with provided env_id and namespace
+    - name: Delete env
       if:   ${{ always() && !vars.ENV_ID && steps.create-env.outcome == 'success' && !runner.debug }}
-      uses: pivotal-cf/gha-shepherd@latest
-      with:
-        api_endpoint: ${{ secrets.SHEPHERD_API_ENDPOINT }}
-        api_token:    ${{ secrets.SHEPHERD_API_TOKEN }}
-        command:      delete
-        debug:        ${{ runner.debug }}
-        env_id:       ${{ steps.create-env.outputs.env-id }}
-        namespace:    tas-devex
+      run: |
+        env_name=${{ steps.setup-bbl-env.outputs.envName }}
+        cd $env_name/bbl-state
+        bbl destroy --no-confirm
+        rm -rf $env_name
+        gsutil rm -R gs://cf-cli-bosh-lites/$env_name

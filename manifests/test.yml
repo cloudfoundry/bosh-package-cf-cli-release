@@ -29,7 +29,7 @@ instance_groups:
   - name: cf-cli-8-linux-test
     release: cf-cli
     properties: {}
-  vm_type: default
+  vm_type: minimal
   stemcell: default
   networks:
   - name: default
