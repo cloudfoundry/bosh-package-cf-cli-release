@@ -237,7 +237,7 @@ jobs:
         git update-index --skip-worktree config/blobs.yml
         git update-index --skip-worktree config/final.yml
 
-        bosh create-release --final --version="${RELEASE_VERSION}" --tarball="./cf-cli-v${RELEASE_VERSION}.tgz"
+        bosh create-release --force --final --version="${RELEASE_VERSION}" --tarball="./cf-cli-v${RELEASE_VERSION}.tgz"
 
         echo "::group::Git state after final release"
         git diff --patch
