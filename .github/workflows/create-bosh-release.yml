@@ -78,11 +78,6 @@ jobs:
         name: bosh-release-candidate
         path: ./cf-cli-dev-release.tgz
 
-    - name: Upload bosh blobs to blobstore
-      if:   ${{ vars.PRODUCTION == 'true' }}
-      run: |
-        bosh upload-blobs
-
     - name: Push changes
       if:   ${{ vars.PRODUCTION == 'true' }}
       uses: ad-m/github-push-action@9870d48124da805820c70ebc6ba563c715551019
