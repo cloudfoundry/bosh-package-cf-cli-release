@@ -76,16 +76,10 @@ RUN \
 
 # bbl and dependencies
 RUN \
-  wget --no-verbose https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${bbl_version}/bbl-v${bbl_version}_linux_x86-64 -P /tmp && \
-  mv /tmp/bbl-* /usr/local/bin/bbl && \
+  curl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${bbl_version}/bbl-v${bbl_version}_linux_amd64 --silent --location --output /tmp/bbl && \
+  mv /tmp/bbl /usr/local/bin/bbl && \
   cd /usr/local/bin && \
   chmod +x bbl
-
-RUN \
-  wget --no-verbose https://github.com/cloudfoundry/bosh-bootloader/archive/v${bbl_version}.tar.gz -P /tmp && \
-  mkdir -p /var/repos/bosh-bootloader && \
-  tar xvf  /tmp/v${bbl_version}.tar.gz --strip-components=1 -C /var/repos/bosh-bootloader && \
-  rm -rf /tmp/*
 
 RUN \
   wget --no-verbose "https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip" -P /tmp && \
