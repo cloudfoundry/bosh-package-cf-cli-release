@@ -140,6 +140,10 @@ create_bosh_release_candidate() {
         bosh remove-blob "${_published_blob}"
       else
         echo "Downloaded binary ${_published_blob_name} has same digest as blob in published release: ${_published_blob_digest}. Disregarding."
+
+        # blobs.yml has no object_id, so bosh cannot sync this blob; make it available locally for create-release
+        mkdir -p blobs
+        cp "${_resolved_tarball}" "blobs/${_published_blob_name}"
       fi
     fi
   done
