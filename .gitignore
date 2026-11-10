@@ -28,3 +28,8 @@ dev_releases
 node_modules
 lease.json
 metadata.json
+
+# CI scratch dirs created in the workspace; must not make the bosh release "dirty"
+bosh-bootloader
+cli-bosh-rel-*
+gha-creds-*.json
